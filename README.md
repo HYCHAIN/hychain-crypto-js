@@ -1,11 +1,9 @@
 # HYTOPIA Crypto JS
-
 A helper package for the HYTOPIA web, client & api. Used to simplify management of various required cryptographic operations specific to user accounts.
 
 HYTOPIA's account architecture retains the private key on the player's client device, and only transmits an AES encrypted version of their keys to HYTOPIA servers for the sake of being able to sign into other devices.
 
 ## Client Implementation Overview
-
 Brief implementation summaries of patterns for client implementation.
 
 ### Account Creation
@@ -19,4 +17,5 @@ Brief implementation summaries of patterns for client implementation.
 1. Account credentials returned to client, including wallet ciphertext and salt.
 1. Client prompts player for their password to locally decrypt ciphertext first time they attempt to submit a CallRequest transaction or perform any wallet operation. Wallet credentials cached/encrypted locally - arbitrary local cache encryption key can be used.
 
- 
+## Test
+You can run unit tests with `npm install && npm test`.
