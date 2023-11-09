@@ -1,7 +1,7 @@
 # HYTOPIA Crypto JS
 A helper package for the HYTOPIA web, client & api. Used to simplify management of various required cryptographic operations specific to user accounts.
 
-HYTOPIA's account architecture retains the private key on the player's client device, and only transmits an AES encrypted version of their keys to HYTOPIA servers for the sake of being able to sign into other devices.
+HYTOPIA's account architecture retains the private key on the player's client device, and only transmits an AES encrypted version of their keys to HYTOPIA servers for the sake of being able to sign into other devices & recover their key client-side.
 
 ## Client Implementation Overview
 Brief implementation summaries of patterns for client implementation.
