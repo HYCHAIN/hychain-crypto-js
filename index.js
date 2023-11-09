@@ -47,6 +47,13 @@ function generateRandomWallet() {
   });
 }
 
+function generateCallRequestData(functionName, abi, args) {
+  const functionSelector = ethers.id(functionName).substring(0, 10);
+  const encodedArgs = generateCalldataEncoding(abi, args);
+
+  return functionSelector + encodedArgs.substring(2);
+}
+
 function generateCallRequest(target, value, data) {
   const nonce = BigInt(_generateNonce());
 
@@ -149,6 +156,7 @@ module.exports = {
   aesDecryptWallet,
   generateRandomSalt,
   generateRandomWallet,
+  generateCallRequestData,
   generateCallRequest,
   generateCalldataEncoding,
   generateCallRequestSignature,

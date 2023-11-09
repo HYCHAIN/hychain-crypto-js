@@ -40,6 +40,16 @@ describe('Unit Tests', () => {
     wallet.address.should.not.equal(wallet2.address);
   });
 
+  it('generateCallRequestData()', () => {
+    const callRequestData = lib.generateCallRequestData(
+      'transfer(address,uint256)',
+      [ 'address', 'uint256' ],
+      [ '0xccccb68e1a848cbdb5b60a974e07aae143ed40c3', 100 ],
+    );
+
+    callRequestData.should.equal('0xa9059cbb000000000000000000000000ccccb68e1a848cbdb5b60a974e07aae143ed40c30000000000000000000000000000000000000000000000000000000000000064');
+  });
+
   it('generateCallRequest()', () => {
     const callRequest = lib.generateCallRequest(
       '0xccccb68e1a848cbdb5b60a974e07aae143ed40c3',
