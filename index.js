@@ -55,7 +55,7 @@ function generateCallRequestData(functionName, abi, args) {
 }
 
 function generateCallRequest(target, value, data) {
-  const nonce = BigInt(_generateNonce());
+  const nonce = _generateNonce();
 
   return { target, value, nonce, data: data || '0x' };
 }

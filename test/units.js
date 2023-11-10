@@ -58,7 +58,7 @@ describe('Unit Tests', () => {
     );
 
     callRequest.should.be.an('object');
-    callRequest.nonce.should.be.a('bigint');
+    callRequest.nonce.should.be.a('string');
   });
 
   it('generateCalldataEncoding()', () => {
