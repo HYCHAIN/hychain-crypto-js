@@ -92,6 +92,28 @@ async function generateNonceSignature(wallet, nonceBytes = 32) {
   return { nonce, signature };
 }
 
+async function generateUser(username, email, phone, password) {
+  if (!username && (!email || !phone) && !password) {
+    throw new Error('username, and email or phone, and password must be provided.');
+  }
+
+  const wallet = generateRandomWallet();
+  const salt = generateRandomSalt();
+  const authorityAddress = wallet.address;
+  const authorityCiphertext = aesEncryptWallet(wallet, password, salt);
+  const authorityProofSignature = await generateScaCreationProofSignature(wallet);
+
+  return {
+    username,
+    email,
+    phone,
+    salt,
+    authorityAddress,
+    authorityCiphertext,
+    authorityProofSignature,
+  }
+}
+
 function getWalletCredentials(wallet) {
   return {
     address: wallet.address,
@@ -162,6 +184,7 @@ module.exports = {
   generateCallRequestSignature,
   generateScaCreationProofSignature,
   generateNonceSignature,
+  generateUser,
   getWalletCredentials,
   toWei,
   toEther,

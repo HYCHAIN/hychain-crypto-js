@@ -99,6 +99,28 @@ describe('Unit Tests', () => {
     nonceSignature.signature.length.should.equal(132);
   });
 
+  it('generateUser()', async () => {
+    const username = 'iamarkdev';
+    const email = 'ark@hytopia.com';
+    const phone = undefined;
+    const password = 'testing';
+    const user = await lib.generateUser(username, email, phone, password);
+
+    user.should.have.property('username');
+    user.should.have.property('email');
+    user.should.have.property('phone');
+    user.should.have.property('salt');
+    user.should.have.property('authorityAddress');
+    user.should.have.property('authorityCiphertext');
+    user.should.have.property('authorityProofSignature');
+    user.username.should.equal(username);
+    user.email.should.equal(email);
+
+    const decryptedWallet = lib.aesDecryptWallet(user.authorityCiphertext, password, user.salt);
+
+    decryptedWallet.should.be.an('object');
+  });
+
   it('getWalletCredentials()', () => {
     const wallet = lib.generateRandomWallet();
     const walletCredentials = lib.getWalletCredentials(wallet);
