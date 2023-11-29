@@ -1,6 +1,6 @@
 {
   "name": "hytopia-crypto-js",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Client-side utility and tooling package for HYTOPIA account private key provisioning, encryption, signing and more.",
   "main": "index.js",
   "scripts": {
@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "chai": "^4.3.10",
+    "eslint": "^7.32.0",
     "mocha": "^10.2.0"
   }
 }

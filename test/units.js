@@ -129,7 +129,7 @@ describe('Unit Tests', () => {
     walletCredentials.should.have.property('privateKey');
     walletCredentials.should.have.property('mnemonic');
 
-    walletCredentials.address.length.should.equal(42)
+    walletCredentials.address.length.should.equal(42);
     walletCredentials.privateKey.length.should.equal(66);
   });
 

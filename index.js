@@ -38,6 +38,7 @@ async function aesDecryptWallet(ciphertext, password, salt) {
 function generateRandomSalt() {
   const array = new Uint8Array(64);
   crypto.getRandomValues(array);
+
   return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
 }
 
@@ -111,7 +112,7 @@ async function generateUser(username, email, phone, password) {
     authorityAddress,
     authorityCiphertext,
     authorityProofSignature,
-  }
+  };
 }
 
 function getWalletCredentials(wallet) {
@@ -127,7 +128,7 @@ function toWei(etherString) {
 }
 
 function toEther(weiString) {
-  return ethers.formatUnits(weiString)
+  return ethers.formatUnits(weiString);
 }
 
 /*
@@ -147,10 +148,10 @@ async function _aesEncrypt(plaintext, key) {
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const plaintextBuffer = new TextEncoder().encode(plaintext);
 
-  const cryptoKey = await crypto.subtle.importKey('raw', keyBuffer, 'AES-GCM', false, ['encrypt']);
+  const cryptoKey = await crypto.subtle.importKey('raw', keyBuffer, 'AES-GCM', false, [ 'encrypt' ]);
   const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, cryptoKey, plaintextBuffer);
 
-  return Array.from(new Uint8Array([...iv, ...new Uint8Array(ciphertext)])).map(byte => byte.toString(16).padStart(2, '0')).join('');
+  return Array.from(new Uint8Array([ ...iv, ...new Uint8Array(ciphertext) ])).map(byte => byte.toString(16).padStart(2, '0')).join('');
 }
 
 async function _aesDecrypt(ciphertext, key) {
@@ -160,7 +161,7 @@ async function _aesDecrypt(ciphertext, key) {
   const iv = ciphertextBuffer.subarray(0, 12);
   const actualCiphertext = ciphertextBuffer.subarray(12);
 
-  const cryptoKey = await crypto.subtle.importKey('raw', keyBuffer, 'AES-GCM', false, ['decrypt']);
+  const cryptoKey = await crypto.subtle.importKey('raw', keyBuffer, 'AES-GCM', false, [ 'decrypt' ]);
   const plaintextBuffer = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, cryptoKey, actualCiphertext);
 
   return new TextDecoder().decode(plaintextBuffer);
@@ -172,7 +173,7 @@ async function _pbkdf2(password, salt) {
     new TextEncoder().encode(password),
     { name: 'PBKDF2' },
     false,
-    ['deriveBits', 'deriveKey']
+    [ 'deriveBits', 'deriveKey' ],
   );
   const key = await crypto.subtle.deriveKey(
     {
@@ -184,7 +185,7 @@ async function _pbkdf2(password, salt) {
     keyMaterial,
     { name: 'AES-GCM', length: 32 * 8 },
     true,
-    ['encrypt', 'decrypt']
+    [ 'encrypt', 'decrypt' ],
   );
   const keyBuffer = await crypto.subtle.exportKey('raw', key);
 
