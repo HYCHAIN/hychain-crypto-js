@@ -4,21 +4,21 @@ const chai = require('chai');
 chai.should();
 
 describe('Unit Tests', () => {
-  it('aesEncryptWallet()', () => {
+  it('aesEncryptWallet()', async () => {
     const wallet = lib.generateRandomWallet();
     const password = 'mycoolpass';
     const salt = lib.generateRandomSalt();
-    const ciphertext = lib.aesEncryptWallet(wallet, password, salt);
+    const ciphertext = await lib.aesEncryptWallet(wallet, password, salt);
 
     ciphertext.length.should.be.gte(300);
   });
 
-  it('aesDecryptWallet()', () => {
+  it('aesDecryptWallet()', async () => {
     const wallet = lib.generateRandomWallet();
     const password = 'somepass';
     const salt = lib.generateRandomSalt();
-    const ciphertext = lib.aesEncryptWallet(wallet, password, salt);
-    const decryptedWallet = lib.aesDecryptWallet(ciphertext, password, salt);
+    const ciphertext = await lib.aesEncryptWallet(wallet, password, salt);
+    const decryptedWallet = await lib.aesDecryptWallet(ciphertext, password, salt);
 
     decryptedWallet.address.should.equal(wallet.address);
     decryptedWallet.mnemonic.phrase.should.equal(wallet.mnemonic.phrase);
@@ -116,7 +116,7 @@ describe('Unit Tests', () => {
     user.username.should.equal(username);
     user.email.should.equal(email);
 
-    const decryptedWallet = lib.aesDecryptWallet(user.authorityCiphertext, password, user.salt);
+    const decryptedWallet = await lib.aesDecryptWallet(user.authorityCiphertext, password, user.salt);
 
     decryptedWallet.should.be.an('object');
   });
