@@ -162,7 +162,7 @@ function _pbkdf2(password, salt) {
   return pbkdf2Sync(
     password,
     salt,
-    600000, // iterations,
+    210000, // iterations,
     32, // key length
     'sha512',
   ).toString('hex');
