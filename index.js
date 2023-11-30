@@ -1,5 +1,5 @@
 const ethers = require('ethers');
-const crypto = require('crypto').webcrypto;
+const crypto = globalThis.crypto;
 
 // must be signed as uint8array bytes, hence .getBytes()
 const SCA_CREATION_PROOF_MESSAGE = ethers.getBytes(ethers.id('Approve HYTOPIA wallet creation'));
