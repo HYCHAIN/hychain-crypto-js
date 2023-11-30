@@ -102,13 +102,11 @@ describe('Unit Tests', () => {
   it('generateUser()', async () => {
     const username = 'iamarkdev';
     const email = 'ark@hytopia.com';
-    const phone = undefined;
     const password = 'testing';
-    const user = await lib.generateUser(username, email, phone, password);
+    const user = await lib.generateUser(username, email, password);
 
     user.should.have.property('username');
     user.should.have.property('email');
-    user.should.have.property('phone');
     user.should.have.property('salt');
     user.should.have.property('authorityAddress');
     user.should.have.property('authorityCiphertext');
@@ -117,6 +115,20 @@ describe('Unit Tests', () => {
     user.email.should.equal(email);
 
     const decryptedWallet = await lib.aesDecryptWallet(user.authorityCiphertext, password, user.salt);
+
+    decryptedWallet.should.be.an('object');
+  });
+
+  it('generateAuthority()', async () => {
+    const password = 'testing';
+    const authority = await lib.generateAuthority(password);
+
+    authority.should.have.property('salt');
+    authority.should.have.property('authorityAddress');
+    authority.should.have.property('authorityCiphertext');
+    authority.should.have.property('authorityProofSignature');
+
+    const decryptedWallet = await lib.aesDecryptWallet(authority.authorityCiphertext, password, authority.salt);
 
     decryptedWallet.should.be.an('object');
   });
