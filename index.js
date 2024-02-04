@@ -2,11 +2,11 @@ const ethers = require('ethers');
 const crypto = globalThis.crypto;
 
 // must be signed as uint8array bytes, hence .getBytes()
-const SCA_CREATION_PROOF_MESSAGE = ethers.getBytes(ethers.id('Approve HYTOPIA wallet creation'));
+const SCA_CREATION_PROOF_MESSAGE = ethers.getBytes(ethers.id('Approve HYPLAY wallet creation'));
 
 const CHAIN_IDS = {
-  HYTOPIA: 2911,
-  HYTOPIATESTNET: 29112,
+  HYCHAIN: 2911,
+  HYCHAINTESTNET: 29112,
   LOCAL: 31337,
 };
 

@@ -1,21 +1,21 @@
 {
-  "name": "hytopia-crypto-js",
-  "version": "1.0.7",
-  "description": "Client-side utility and tooling package for HYTOPIA account private key provisioning, encryption, signing and more.",
+  "name": "hychain-crypto-js",
+  "version": "1.0.0",
+  "description": "Client-side utility and tooling package for HYPLAY/HYCHAIN account private key provisioning, encryption, signing and more.",
   "main": "index.js",
   "scripts": {
     "test": "mocha 'test/**/*.js' --exit -t 600000"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hytopiagg/hytopia-crypto-js.git"
+    "url": "git+https://github.com/hychain/hychain-crypto-js.git"
   },
   "author": "HYTOPIA, Inc",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/hytopiagg/hytopia-crypto-js/issues"
+    "url": "https://github.com/hychain/hychain-crypto-js/issues"
   },
-  "homepage": "https://github.com/hytopiagg/hytopia-crypto-js#readme",
+  "homepage": "https://github.com/hychain/hychain-crypto-js#readme",
   "dependencies": {
     "ethers": "^6.7.1"
   },

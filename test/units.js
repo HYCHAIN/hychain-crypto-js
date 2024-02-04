@@ -77,7 +77,7 @@ describe('Unit Tests', () => {
       lib.toWei('2.0'),
       '',
     );
-    const chainId = lib.CHAIN_IDS['HYTOPIA'];
+    const chainId = lib.CHAIN_IDS['HYCHAIN'];
     const callRequestSignature = await lib.generateCallRequestSignature(wallet, callRequest, chainId);
 
     callRequestSignature.length.should.equal(132);
@@ -101,7 +101,7 @@ describe('Unit Tests', () => {
 
   it('generateUser()', async () => {
     const username = 'iamarkdev';
-    const email = 'ark@hytopia.com';
+    const email = 'ark@hychain.com';
     const password = 'testing';
     const user = await lib.generateUser(username, email, password);
 
