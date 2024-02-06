@@ -3,6 +3,7 @@
   "version": "1.0.1",
   "description": "Client-side utility and tooling package for HYPLAY/HYCHAIN account private key provisioning, encryption, signing and more.",
   "main": "index.js",
+  "types": "index.d.ts",
   "scripts": {
     "test": "mocha 'test/**/*.js' --exit -t 600000"
   },
