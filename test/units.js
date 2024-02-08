@@ -4,21 +4,44 @@ const chai = require('chai');
 chai.should();
 
 describe('Unit Tests', () => {
-  it('aesEncryptWallet()', async () => {
-    const wallet = lib.generateRandomWallet();
-    const password = 'mycoolpass';
-    const salt = lib.generateRandomSalt();
-    const ciphertext = await lib.aesEncryptWallet(wallet, password, salt);
+  it('aesEncrypt(), aesDecrypt(), pbkdf2()', async () => {
+    const plaintext = 'sometext';
+    const password = 'password';
+    const pbkdf2Key = await lib.pbkdf2(password, 'someSalt');
+    const ciphertext = await lib.aesEncrypt(plaintext, pbkdf2Key);
+    const decrypted = await lib.aesDecrypt(ciphertext, pbkdf2Key);
 
-    ciphertext.length.should.be.gte(300);
+    decrypted.should.equal(plaintext);
   });
 
-  it('aesDecryptWallet()', async () => {
+  it('aesEncryptWalletWithPassword(), aesDecryptWalletWithPassword()', async () => {
     const wallet = lib.generateRandomWallet();
     const password = 'somepass';
     const salt = lib.generateRandomSalt();
-    const ciphertext = await lib.aesEncryptWallet(wallet, password, salt);
-    const decryptedWallet = await lib.aesDecryptWallet(ciphertext, password, salt);
+    const ciphertext = await lib.aesEncryptWalletWithPassword(wallet, password, salt);
+    const decryptedWallet = await lib.aesDecryptWalletWithPassword(ciphertext, password, salt);
+
+    decryptedWallet.address.should.equal(wallet.address);
+    decryptedWallet.mnemonic.phrase.should.equal(wallet.mnemonic.phrase);
+  });
+
+  it('aesEncryptWalletWithBackupCode(), aesDecryptWalletWithBackupCode()', async () => {
+    const wallet = lib.generateRandomWallet();
+    const backupCode = lib.generateBackupCode();
+    const salt = lib.generateRandomSalt();
+    const ciphertext = await lib.aesEncryptWalletWithBackupCode(wallet, backupCode, salt);
+    const decryptedWallet = await lib.aesDecryptWalletWithBackupCode(ciphertext, backupCode, salt);
+
+    decryptedWallet.address.should.equal(wallet.address);
+    decryptedWallet.mnemonic.phrase.should.equal(wallet.mnemonic.phrase);
+  });
+
+  it('aesEncryptWalletWithBackupQuestionAnswers(), aesDecryptWalletWithBackupQuestionAnswers()', async () => {
+    const wallet = lib.generateRandomWallet();
+    const answers = [ '1994', 'Robert', 'Red' ];
+    const salt = lib.generateRandomSalt();
+    const ciphertext = await lib.aesEncryptWalletWithBackupQuestionAnswers(wallet, answers, salt);
+    const decryptedWallet = await lib.aesDecryptWalletWithBackupQuestionAnswers(ciphertext, answers, salt);
 
     decryptedWallet.address.should.equal(wallet.address);
     decryptedWallet.mnemonic.phrase.should.equal(wallet.mnemonic.phrase);
@@ -114,7 +137,7 @@ describe('Unit Tests', () => {
     user.username.should.equal(username);
     user.email.should.equal(email);
 
-    const decryptedWallet = await lib.aesDecryptWallet(user.authorityCiphertext, password, user.salt);
+    const decryptedWallet = await lib.aesDecryptWalletWithPassword(user.authorityCiphertext, password, user.salt);
 
     decryptedWallet.should.be.an('object');
   });
@@ -128,9 +151,23 @@ describe('Unit Tests', () => {
     authority.should.have.property('authorityCiphertext');
     authority.should.have.property('authorityProofSignature');
 
-    const decryptedWallet = await lib.aesDecryptWallet(authority.authorityCiphertext, password, authority.salt);
+    const decryptedWallet = await lib.aesDecryptWalletWithPassword(authority.authorityCiphertext, password, authority.salt);
 
     decryptedWallet.should.be.an('object');
+  });
+
+  it('generateBackupCode()', () => {
+    const backupCode = lib.generateBackupCode();
+    const backupCodeTwo = lib.generateBackupCode();
+
+    backupCode.length.should.equal(10);
+    backupCode.should.not.equal(backupCodeTwo);
+  });
+
+  it('generateBackupQuestions()', () => {
+    const backupQuestions = lib.generateBackupQuestions();
+
+    backupQuestions.length.should.equal(10);
   });
 
   it('getWalletCredentials()', () => {
@@ -145,13 +182,13 @@ describe('Unit Tests', () => {
     walletCredentials.privateKey.length.should.equal(66);
   });
 
-  it('toWei', () => {
+  it('toWei()', () => {
     const wei = lib.toWei('1.0');
 
     wei.should.be.a('bigint');
   });
 
-  it('toEther', () => {
+  it('toEther()', () => {
     const ether = lib.toEther(BigInt('1000000000000000000'));
 
     ether.should.equal('1.0');

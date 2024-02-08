@@ -1,16 +1,33 @@
 declare module 'hychain-crypto-js' {
   import { Wallet } from 'ethers';
 
+  export type Ciphertext = string;
+  export type PBKDF2Key = string;
+
   export const CHAIN_IDS: {
       HYCHAIN: number;
       HYCHAINTESTNET: number;
       LOCAL: number;
   };
 
-  export function aesEncryptWallet(wallet: Wallet, password: string, salt: string): Promise<string>;
+  export function aesEncrypt(plaintext: string, key: PBKDF2Key): Promise<Ciphertext>;
   
-  export function aesDecryptWallet(ciphertext: string, password: string, salt: string): Promise<Wallet>;
+  export function aesDecrypt(ciphertext: Ciphertext, key: PBKDF2Key): Promise<string>;
+
+  export function aesEncryptWalletWithPassword(wallet: Wallet, password: string, salt: string): Promise<Ciphertext>;
   
+  export function aesDecryptWalletWithPassword(ciphertext: Ciphertext, password: string, salt: string): Promise<Wallet>;
+  
+  export function aesEncryptWalletWithBackupCode(wallet: Wallet, code: string, salt: string): Promise<Ciphertext>;
+
+  export function aesDecryptWalletWithBackupCode(ciphertext: Ciphertext, code: string, salt: string): Promise<Wallet>;
+
+  export function aesEncryptWalletWithBackupQuestionAnswers(wallet: Wallet, answers: string[], salt: string): Promise<Ciphertext>;
+
+  export function aesDecryptWalletWithBackupQuestionAnswers(ciphertext: Ciphertext, answers: string[], salt: string): Promise<Wallet>;
+
+  export function pbkdf2(password: string, salt: string): Promise<PBKDF2Key>;
+
   export function generateRandomSalt(): string;
   
   export function generateRandomWallet(): Wallet;
@@ -43,16 +60,20 @@ declare module 'hychain-crypto-js' {
   export function generateAuthority(password: string): Promise<{
       salt: string;
       authorityAddress: string;
-      authorityCiphertext: string;
+      authorityCiphertext: Ciphertext;
       authorityProofSignature: string;
   }>;
+
+  export function generateBackupCode(): string;
+
+  export function generateBackupQuestions(): string[];
 
   export function generateUser(username: string, email: string, password: string): Promise<{
       username: string;
       email: string;
       salt: string;
       authorityAddress: string;
-      authorityCiphertext: string;
+      authorityCiphertext: Ciphertext;
       authorityProofSignature: string;
   }>;
 

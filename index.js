@@ -14,25 +14,118 @@ const CHAIN_IDS = {
  * Public
  */
 
-async function aesEncryptWallet(wallet, password, salt) {
-  try {
-    const key = await _pbkdf2(password, salt);
+async function aesEncrypt(plaintext, pbkdf2Key) {
+  const keyBuffer = new Uint8Array(pbkdf2Key.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const plaintextBuffer = new TextEncoder().encode(plaintext);
 
-    return await _aesEncrypt(JSON.stringify(getWalletCredentials(wallet)), key);
+  const cryptoKey = await crypto.subtle.importKey('raw', keyBuffer, 'AES-GCM', false, [ 'encrypt' ]);
+  const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, cryptoKey, plaintextBuffer);
+
+  return Array.from(new Uint8Array([ ...iv, ...new Uint8Array(ciphertext) ])).map(byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
+async function aesDecrypt(ciphertext, pbkdf2Key) {
+  const keyBuffer = new Uint8Array(pbkdf2Key.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+  const ciphertextBuffer = new Uint8Array(ciphertext.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+
+  const iv = ciphertextBuffer.subarray(0, 12);
+  const actualCiphertext = ciphertextBuffer.subarray(12);
+
+  const cryptoKey = await crypto.subtle.importKey('raw', keyBuffer, 'AES-GCM', false, [ 'decrypt' ]);
+  const plaintextBuffer = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, cryptoKey, actualCiphertext);
+
+  return new TextDecoder().decode(plaintextBuffer);
+}
+
+async function aesEncryptWalletWithPassword(wallet, password, salt) {
+  try {
+    const key = await pbkdf2(password, salt);
+
+    return await aesEncrypt(JSON.stringify(getWalletCredentials(wallet)), key);
   } catch (error) {
     throw new Error('Wallet could not be encrypted.');
   }
 }
 
-async function aesDecryptWallet(ciphertext, password, salt) {
+async function aesDecryptWalletWithPassword(ciphertext, password, salt) {
   try {
-    const key = await _pbkdf2(password, salt);
-    const walletCredentials = JSON.parse(await _aesDecrypt(ciphertext, key));
+    const key = await pbkdf2(password, salt);
+    const walletCredentials = JSON.parse(await aesDecrypt(ciphertext, key));
 
     return _getWallet(walletCredentials);
   } catch (error) {
     throw new Error('Wallet could not be decrypted.');
   }
+}
+
+async function aesEncryptWalletWithBackupCode(wallet, code, salt) {
+  if (code.length < 10) { throw new Error('code must be at least 10 characters.'); }
+
+  try {
+    const key = await pbkdf2(code, salt);
+
+    return await aesEncrypt(JSON.stringify(getWalletCredentials(wallet)), key);
+  } catch (error) {
+    throw new Error('Wallet could not be encrypted.');
+  }
+}
+
+async function aesDecryptWalletWithBackupCode(ciphertext, code, salt) {
+  try {
+    const key = await pbkdf2(code, salt);
+    const walletCredentials = JSON.parse(await aesDecrypt(ciphertext, key));
+
+    return _getWallet(walletCredentials);
+  } catch (error) {
+    throw new Error('Wallet could not be decrypted.');
+  }
+}
+
+async function aesEncryptWalletWithBackupQuestionAnswers(wallet, answers, salt) {
+  try {
+    const key = await pbkdf2(answers.join(','), salt);
+
+    return await aesEncrypt(JSON.stringify(getWalletCredentials(wallet)), key);
+  } catch (error) {
+    throw new Error('Wallet could not be encrypted.');
+  }
+}
+
+async function aesDecryptWalletWithBackupQuestionAnswers(ciphertext, answers, salt) {
+  try {
+    const key = await pbkdf2(answers.join(','), salt);
+    const walletCredentials = JSON.parse(await aesDecrypt(ciphertext, key));
+
+    return _getWallet(walletCredentials);
+  } catch (error) {
+    throw new Error('Wallet could not be decrypted.');
+  }
+}
+
+async function pbkdf2(password, salt) {
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(password),
+    { name: 'PBKDF2' },
+    false,
+    [ 'deriveBits', 'deriveKey' ],
+  );
+  const key = await crypto.subtle.deriveKey(
+    {
+      name: 'PBKDF2',
+      salt: new TextEncoder().encode(salt),
+      iterations: 600000,
+      hash: 'SHA-512',
+    },
+    keyMaterial,
+    { name: 'AES-GCM', length: 32 * 8 },
+    true,
+    [ 'encrypt', 'decrypt' ],
+  );
+  const keyBuffer = await crypto.subtle.exportKey('raw', key);
+
+  return Array.from(new Uint8Array(keyBuffer)).map(byte => byte.toString(16).padStart(2, '0')).join('');
 }
 
 function generateRandomSalt() {
@@ -101,7 +194,7 @@ async function generateAuthority(password) {
   const wallet = generateRandomWallet();
   const salt = generateRandomSalt();
   const authorityAddress = wallet.address;
-  const authorityCiphertext = await aesEncryptWallet(wallet, password, salt);
+  const authorityCiphertext = await aesEncryptWalletWithPassword(wallet, password, salt);
   const authorityProofSignature = await generateScaCreationProofSignature(wallet);
 
   return {
@@ -110,6 +203,34 @@ async function generateAuthority(password) {
     authorityCiphertext,
     authorityProofSignature,
   };
+}
+
+function generateBackupCode() {
+  const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+=';
+
+  let password = '';
+  
+  for (let i = 0; i < 10; i++) {
+    const randomIndex = Math.floor(Math.random() * charset.length);
+    password += charset[randomIndex];
+  }
+  
+  return password;
+}
+
+function generateBackupQuestions() {
+  return [
+    'What was the make and model of your first car?',
+    'What is the name of the street where you grew up?',
+    'What was the name of your first pet?',
+    'What was the first concert you attended?',
+    'What is the middle name of your oldest sibling?',
+    'In what city or town did your parents meet?',
+    'What was the name of your favorite teacher in school?',
+    'What was your dream job as a child?',
+    'What is the name of the place your wedding reception was held?',
+    'What is the first name of the person you went to your first dance with?'
+  ];
 }
 
 async function generateUser(username, email, password) {
@@ -157,63 +278,21 @@ function _generateNonce(nonceBytes = 32) {
   return ethers.hexlify(ethers.randomBytes(nonceBytes));
 }
 
-async function _aesEncrypt(plaintext, key) {
-  const keyBuffer = new Uint8Array(key.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const plaintextBuffer = new TextEncoder().encode(plaintext);
-
-  const cryptoKey = await crypto.subtle.importKey('raw', keyBuffer, 'AES-GCM', false, [ 'encrypt' ]);
-  const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, cryptoKey, plaintextBuffer);
-
-  return Array.from(new Uint8Array([ ...iv, ...new Uint8Array(ciphertext) ])).map(byte => byte.toString(16).padStart(2, '0')).join('');
-}
-
-async function _aesDecrypt(ciphertext, key) {
-  const keyBuffer = new Uint8Array(key.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
-  const ciphertextBuffer = new Uint8Array(ciphertext.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
-
-  const iv = ciphertextBuffer.subarray(0, 12);
-  const actualCiphertext = ciphertextBuffer.subarray(12);
-
-  const cryptoKey = await crypto.subtle.importKey('raw', keyBuffer, 'AES-GCM', false, [ 'decrypt' ]);
-  const plaintextBuffer = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, cryptoKey, actualCiphertext);
-
-  return new TextDecoder().decode(plaintextBuffer);
-}
-
-async function _pbkdf2(password, salt) {
-  const keyMaterial = await crypto.subtle.importKey(
-    'raw',
-    new TextEncoder().encode(password),
-    { name: 'PBKDF2' },
-    false,
-    [ 'deriveBits', 'deriveKey' ],
-  );
-  const key = await crypto.subtle.deriveKey(
-    {
-      name: 'PBKDF2',
-      salt: new TextEncoder().encode(salt),
-      iterations: 600000,
-      hash: 'SHA-512',
-    },
-    keyMaterial,
-    { name: 'AES-GCM', length: 32 * 8 },
-    true,
-    [ 'encrypt', 'decrypt' ],
-  );
-  const keyBuffer = await crypto.subtle.exportKey('raw', key);
-
-  return Array.from(new Uint8Array(keyBuffer)).map(byte => byte.toString(16).padStart(2, '0')).join('');
-}
-
 /*
  * Export
  */
 
 module.exports = {
   CHAIN_IDS,
-  aesEncryptWallet,
-  aesDecryptWallet,
+  aesEncrypt,
+  aesDecrypt,
+  aesEncryptWalletWithPassword,
+  aesDecryptWalletWithPassword,
+  aesEncryptWalletWithBackupCode,
+  aesDecryptWalletWithBackupCode,
+  aesEncryptWalletWithBackupQuestionAnswers,
+  aesDecryptWalletWithBackupQuestionAnswers,
+  pbkdf2,
   generateRandomSalt,
   generateRandomWallet,
   generateCallRequestData,
@@ -223,6 +302,8 @@ module.exports = {
   generateScaCreationProofSignature,
   generateNonceSignature,
   generateAuthority,
+  generateBackupCode,
+  generateBackupQuestions,
   generateUser,
   getWalletCredentials,
   toWei,
