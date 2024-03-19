@@ -186,6 +186,31 @@ async function generateNonceSignature(wallet, nonceBytes = 32) {
   return { nonce, signature };
 }
 
+async function generateSessionSignature(wallet, callerAddress, sessionRequest, expiresAt, nonce, deadline, chainId) {
+  const encodedSessionRequest = generateCalldataEncoding(
+    [
+      'address',
+      'tuple(uint256, tuple(address, bytes4[])[], tuple(address, uint256)[], tuple(address, bool, uint256[])[], tuple(address, bool, uint256[], uint256[])[])',
+      'uint256',
+      'uint256',
+      'uint256',
+      'uint256',
+    ],
+    [
+      callerAddress,
+      sessionRequest,
+      expiresAt,
+      nonce,
+      deadline,
+      chainId,
+    ],
+  );
+
+  return wallet.signMessage(
+    ethers.getBytes(ethers.keccak256(encodedSessionRequest)),
+  );
+}
+
 async function generateAuthority(password) {
   if (!password) {
     throw new Error('password must be provided.');
@@ -301,6 +326,7 @@ module.exports = {
   generateCallRequestSignature,
   generateScaCreationProofSignature,
   generateNonceSignature,
+  generateSessionSignature,
   generateAuthority,
   generateBackupCode,
   generateBackupQuestions,

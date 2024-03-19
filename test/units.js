@@ -122,6 +122,22 @@ describe('Unit Tests', () => {
     nonceSignature.signature.length.should.equal(132);
   });
 
+  it('generateSessionSignature()', async () => {
+    const wallet = lib.generateRandomWallet();
+    const sessionSignature = await lib.generateSessionSignature(
+      wallet,
+      '0xccccb68e1a848cbdb5b60a974e07aae143ed40c3',
+      [ 0, [], [], [], [] ],
+      Date.now(),
+      1,
+      Date.now(),
+      1,
+    );
+
+    sessionSignature.should.be.a('string');
+    sessionSignature.length.should.equal(132);
+  });
+
   it('generateUser()', async () => {
     const username = 'iamarkdev';
     const email = 'ark@hychain.com';

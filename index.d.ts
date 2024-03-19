@@ -57,6 +57,8 @@ declare module 'hychain-crypto-js' {
       signature: string;
   }>;
 
+  export function generateSessionSignature(wallet: Wallet, callerAddress: address, sessionRequest: SessionRequest, expiresAt: number, nonce: number, deadline: number, chainId: number): Promise<string>;
+
   export function generateAuthority(password: string): Promise<{
       salt: string;
       authorityAddress: string;
