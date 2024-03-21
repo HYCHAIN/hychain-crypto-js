@@ -3,6 +3,14 @@ declare module 'hychain-crypto-js' {
 
   export type Ciphertext = string;
   export type PBKDF2Key = string;
+  export type CallRequestData = string;
+  export type CallRequest = [
+    string, // target
+    string, // value
+    string, // nonce
+    string, // data
+  ];
+
 
   export const CHAIN_IDS: {
       HYCHAIN: number;
@@ -32,23 +40,15 @@ declare module 'hychain-crypto-js' {
   
   export function generateRandomWallet(): Wallet;
   
-  export function generateCallRequestData(functionName: string, abi: any[], args: any[]): string;
+  export function generateCallRequestData(functionName: string, abi: any[], args: any[]): CallRequestData;
 
-  export function generateCallRequest(target: string, value: string, data?: string): {
-      target: string;
-      value: string;
-      nonce: string;
-      data: string;
-  };
+  export function generateCallRequest(target: string, value: string, nonce?: string, data?: CallRequestData): CallRequest;
 
   export function generateCalldataEncoding(abi: any[], values: any[]): string;
 
-  export function generateCallRequestSignature(wallet: Wallet, callRequest: {
-      target: string;
-      value: string;
-      nonce: string;
-      data: string;
-  }, chainId: number): Promise<string>;
+  export function generateCallRequestSignature(wallet: Wallet, callRequest: CallRequest, deadline: number, chainId: number): Promise<string>;
+
+  export function generateCallRequestsSignature(wallet: Wallet, callRequest: CallRequest[], deadline: number, chainId: number): Promise<string>;
 
   export function generateScaCreationProofSignature(wallet: Wallet): Promise<string>;
 

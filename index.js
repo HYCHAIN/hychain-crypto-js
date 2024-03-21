@@ -148,30 +148,49 @@ function generateCallRequestData(functionName, abi, args) {
   return functionSelector + encodedArgs.substring(2);
 }
 
-function generateCallRequest(target, value, data) {
-  const nonce = _generateNonce();
-
-  return { target, value, nonce, data: data || '0x' };
+function generateCallRequest(target, value, nonce = _generateNonce(), data = '0x') {
+  return [ target, value, nonce, data ];
 }
 
 function generateCalldataEncoding(abi, values) {
   return ethers.AbiCoder.defaultAbiCoder().encode(abi, values);
 }
 
-async function generateCallRequestSignature(wallet, callRequest, chainId) {
+async function generateCallRequestSignature(wallet, callRequest, deadline, chainId) {
   const encodedCallRequest = generateCalldataEncoding(
     [
-      'tuple(address target, uint256 value, uint256 nonce, bytes data)',
+      'tuple(address, uint256, uint256, bytes)',
+      'uint256',
       'uint256',
     ],
     [
       callRequest,
+      deadline,
       chainId,
     ],
   );
 
   return await wallet.signMessage(
     ethers.getBytes(ethers.keccak256(encodedCallRequest)),
+  );
+}
+
+async function generateCallRequestsSignature(wallet, callRequests, deadline, chainId) {
+  const encodedCallRequests = generateCalldataEncoding(
+    [
+      'tuple(address, uint256, uint256, bytes)[]',
+      'uint256',
+      'uint256',
+    ],
+    [
+      callRequests,
+      deadline,
+      chainId,
+    ],
+  );
+
+  return await wallet.signMessage(
+    ethers.getBytes(ethers.keccak256(encodedCallRequests)),
   );
 }
 
@@ -324,6 +343,7 @@ module.exports = {
   generateCallRequest,
   generateCalldataEncoding,
   generateCallRequestSignature,
+  generateCallRequestsSignature,
   generateScaCreationProofSignature,
   generateNonceSignature,
   generateSessionSignature,
