@@ -46,6 +46,13 @@ describe('Unit Tests', () => {
     decryptedWallet.address.should.equal(wallet.address);
     decryptedWallet.mnemonic.phrase.should.equal(wallet.mnemonic.phrase);
   });
+  
+  it('generateRandomNonce()', async() => {
+    const nonce = await lib.generateRandomNonce();
+
+    nonce.should.be.a('string');
+    nonce.length.should.equal(66);
+  });
 
   it('generateRandomSalt()', () => {
     const salt = lib.generateRandomSalt();

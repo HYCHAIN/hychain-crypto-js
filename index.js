@@ -128,6 +128,10 @@ async function pbkdf2(password, salt) {
   return Array.from(new Uint8Array(keyBuffer)).map(byte => byte.toString(16).padStart(2, '0')).join('');
 }
 
+function generateRandomNonce(nonceBytes = 32) {
+  return ethers.hexlify(ethers.randomBytes(nonceBytes));
+}
+
 function generateRandomSalt() {
   const array = new Uint8Array(64);
   crypto.getRandomValues(array);
@@ -148,7 +152,7 @@ function generateCallRequestData(functionName, abi, args) {
   return functionSelector + encodedArgs.substring(2);
 }
 
-function generateCallRequest(target, value, nonce = _generateNonce(), data = '0x') {
+function generateCallRequest(target, value, nonce = generateRandomNonce(), data = '0x') {
   return [ target, value, nonce, data ];
 }
 
@@ -199,7 +203,7 @@ async function generateScaCreationProofSignature(wallet) {
 }
 
 async function generateNonceSignature(wallet, nonceBytes = 32) {
-  const nonce = _generateNonce(nonceBytes);
+  const nonce = generateRandomNonce(nonceBytes);
   const signature = await wallet.signMessage(nonce);
 
   return { nonce, signature };
@@ -318,10 +322,6 @@ function _getWallet(walletCredentials) {
   return ethers.Wallet.fromPhrase(walletCredentials.mnemonic);
 }
 
-function _generateNonce(nonceBytes = 32) {
-  return ethers.hexlify(ethers.randomBytes(nonceBytes));
-}
-
 /*
  * Export
  */
@@ -337,6 +337,7 @@ module.exports = {
   aesEncryptWalletWithBackupQuestionAnswers,
   aesDecryptWalletWithBackupQuestionAnswers,
   pbkdf2,
+  generateRandomNonce,
   generateRandomSalt,
   generateRandomWallet,
   generateCallRequestData,

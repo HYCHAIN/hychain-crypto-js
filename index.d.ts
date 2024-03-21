@@ -36,6 +36,8 @@ declare module 'hychain-crypto-js' {
 
   export function pbkdf2(password: string, salt: string): Promise<PBKDF2Key>;
 
+  export function generateRandomNonce(): string;
+
   export function generateRandomSalt(): string;
   
   export function generateRandomWallet(): Wallet;
