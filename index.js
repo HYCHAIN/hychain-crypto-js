@@ -53,7 +53,7 @@ async function aesDecryptWalletWithPassword(ciphertext, password, salt) {
     const key = await pbkdf2(password, salt);
     const walletCredentials = JSON.parse(await aesDecrypt(ciphertext, key));
 
-    return _getWallet(walletCredentials);
+    return getWallet(walletCredentials);
   } catch (error) {
     throw new Error('Wallet could not be decrypted.');
   }
@@ -76,7 +76,7 @@ async function aesDecryptWalletWithBackupCode(ciphertext, code, salt) {
     const key = await pbkdf2(code, salt);
     const walletCredentials = JSON.parse(await aesDecrypt(ciphertext, key));
 
-    return _getWallet(walletCredentials);
+    return getWallet(walletCredentials);
   } catch (error) {
     throw new Error('Wallet could not be decrypted.');
   }
@@ -97,7 +97,7 @@ async function aesDecryptWalletWithBackupQuestionAnswers(ciphertext, answers, sa
     const key = await pbkdf2(answers.join(','), salt);
     const walletCredentials = JSON.parse(await aesDecrypt(ciphertext, key));
 
-    return _getWallet(walletCredentials);
+    return getWallet(walletCredentials);
   } catch (error) {
     throw new Error('Wallet could not be decrypted.');
   }
@@ -298,6 +298,10 @@ async function generateUser(username, email, password) {
   };
 }
 
+function getWallet(walletCredentials) {
+  return ethers.Wallet.fromPhrase(walletCredentials.mnemonic);
+}
+
 function getWalletCredentials(wallet) {
   return {
     address: wallet.address,
@@ -306,20 +310,13 @@ function getWalletCredentials(wallet) {
   };
 }
 
+
 function toWei(etherString) {
   return ethers.parseEther(etherString);
 }
 
 function toEther(weiString) {
   return ethers.formatUnits(weiString);
-}
-
-/*
- * Helpers
- */
-
-function _getWallet(walletCredentials) {
-  return ethers.Wallet.fromPhrase(walletCredentials.mnemonic);
 }
 
 /*
@@ -352,6 +349,7 @@ module.exports = {
   generateBackupCode,
   generateBackupQuestions,
   generateUser,
+  getWallet,
   getWalletCredentials,
   toWei,
   toEther,

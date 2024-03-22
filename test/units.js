@@ -211,6 +211,15 @@ describe('Unit Tests', () => {
     backupQuestions.length.should.equal(10);
   });
 
+  it('getWallet()', () => {
+    const wallet = lib.generateRandomWallet();
+    const walletCredentials = lib.getWalletCredentials(wallet);
+    const wallet2 = lib.getWallet(walletCredentials);
+
+    wallet2.address.should.equal(wallet.address);
+    wallet2.mnemonic.phrase.should.equal(wallet.mnemonic.phrase);
+  });
+
   it('getWalletCredentials()', () => {
     const wallet = lib.generateRandomWallet();
     const walletCredentials = lib.getWalletCredentials(wallet);

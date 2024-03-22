@@ -10,7 +10,11 @@ declare module 'hychain-crypto-js' {
     string, // nonce
     string, // data
   ];
-
+  export type WalletCredentials = {
+    address: string;
+    privateKey: string;
+    mnemonic: string;
+  }
 
   export const CHAIN_IDS: {
       HYCHAIN: number;
@@ -81,11 +85,9 @@ declare module 'hychain-crypto-js' {
       authorityProofSignature: string;
   }>;
 
-  export function getWalletCredentials(wallet: Wallet): {
-      address: string;
-      privateKey: string;
-      mnemonic: string;
-  };
+  export function getWallet(walletCredentials: WalletCredentials): Wallet;
+
+  export function getWalletCredentials(wallet: Wallet): WalletCredentials;
 
   export function toWei(etherString: string): string;
 
