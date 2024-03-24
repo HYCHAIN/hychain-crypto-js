@@ -145,9 +145,43 @@ function generateRandomWallet() {
   });
 }
 
-function generateCallRequestData(functionName, abi, args) {
-  const functionSelector = ethers.id(functionName).substring(0, 10);
-  const encodedArgs = generateCalldataEncoding(abi, args);
+function generateCallRequestDataFromAbi(abi, functionName, args) {
+  const iface = new ethers.Interface(abi);
+  const functionFragment = iface.getFunction(functionName);
+
+  if (!functionFragment) {
+    throw new Error('Function not found in ABI.');
+  }
+
+  return iface.encodeFunctionData(functionFragment, args);
+}
+
+function generateCallRequestDataFromFunctionSignature(functionSignature, args) {
+  const functionName = functionSignature.split('(')[0];
+  const parametersList = functionSignature.slice(functionSignature.indexOf('(') + 1, functionSignature.lastIndexOf(')'));
+
+  let types = [];
+  let depth = 0;
+  let currentType = '';
+  for (let char of parametersList) {
+    if (char === '(') depth++; // Entering a tuple or nested tuple
+    else if (char === ')') depth--; // Exiting a tuple or nested tuple
+
+    if (depth === 0 && char === ',') { // At root level, commas separate types
+      types.push(currentType.trim());
+      currentType = '';
+    } else {
+      currentType += char;
+    }
+  }
+  if (currentType) types.push(currentType.trim()); // Add the last type
+
+  // Simplify the parsing, extracting only the base types without parameter names
+  types = types.map(type => type.lastIndexOf(' ') !== -1 ? type.slice(0, type.lastIndexOf(' ')) : type);
+
+  const canonincalFunctionSignature = `${functionName}(${types.join(',')})`;
+  const functionSelector = ethers.id(canonincalFunctionSignature).substring(0, 10);
+  const encodedArgs = generateCalldataEncoding(types, args);
 
   return functionSelector + encodedArgs.substring(2);
 }
@@ -156,8 +190,8 @@ function generateCallRequest(target, value, nonce = generateRandomNonce(), data 
   return [ target, value, nonce, data ];
 }
 
-function generateCalldataEncoding(abi, values) {
-  return ethers.AbiCoder.defaultAbiCoder().encode(abi, values);
+function generateCalldataEncoding(types, values) {
+  return ethers.AbiCoder.defaultAbiCoder().encode(types, values);
 }
 
 async function generateCallRequestSignature(wallet, callRequest, deadline, chainId) {
@@ -337,7 +371,8 @@ module.exports = {
   generateRandomNonce,
   generateRandomSalt,
   generateRandomWallet,
-  generateCallRequestData,
+  generateCallRequestDataFromAbi,
+  generateCallRequestDataFromFunctionSignature,
   generateCallRequest,
   generateCalldataEncoding,
   generateCallRequestSignature,

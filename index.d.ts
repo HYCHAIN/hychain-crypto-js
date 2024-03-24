@@ -46,7 +46,9 @@ declare module 'hychain-crypto-js' {
   
   export function generateRandomWallet(): Wallet;
   
-  export function generateCallRequestData(functionName: string, abi: any[], args: any[]): CallRequestData;
+  export function generateCallRequestDataFromAbi(abi: any[], functionName: string, args: any[]): CallRequestData;
+
+  export function generateCallRequestDataFromFunctionSignature(functionSignature: string, args: any[]): CallRequestData;
 
   export function generateCallRequest(target: string, value: string, nonce?: string, data?: CallRequestData): CallRequest;
 

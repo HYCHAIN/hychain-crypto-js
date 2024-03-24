@@ -70,13 +70,43 @@ describe('Unit Tests', () => {
     wallet.address.should.not.equal(wallet2.address);
   });
 
-  it('generateCallRequestData()', () => {
-    const callRequestData = lib.generateCallRequestData(
-      'transfer(address,uint256)',
-      [ 'address', 'uint256' ],
+  it('generateCallRequestDataFromAbi()', () => {
+    const abi = [
+      {
+        inputs: [
+          {
+            internalType: 'address',
+            name: '_recipient',
+            type: 'address',
+          },
+          {
+            internalType: 'uint256',
+            name: '_amount',
+            type: 'uint256',
+          },
+        ],
+        name: 'transfer',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+      },
+    ];
+
+    const callRequestData = lib.generateCallRequestDataFromAbi(
+      abi,
+      'transfer',
       [ '0xccccb68e1a848cbdb5b60a974e07aae143ed40c3', 100 ],
     );
+    
+    callRequestData.should.equal('0xa9059cbb000000000000000000000000ccccb68e1a848cbdb5b60a974e07aae143ed40c30000000000000000000000000000000000000000000000000000000000000064');
+  });
 
+  it('generateCallRequestDataFromFunctionSignature()', () => {
+    const callRequestData = lib.generateCallRequestDataFromFunctionSignature(
+      'transfer(address,uint256)',
+      [ '0xccccb68e1a848cbdb5b60a974e07aae143ed40c3', 100 ],
+    );
+    
     callRequestData.should.equal('0xa9059cbb000000000000000000000000ccccb68e1a848cbdb5b60a974e07aae143ed40c30000000000000000000000000000000000000000000000000000000000000064');
   });
 
