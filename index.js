@@ -150,7 +150,7 @@ function generateCallRequestDataFromAbi(abi, functionName, args) {
   const functionFragment = iface.getFunction(functionName);
 
   if (!functionFragment) {
-    throw new Error('Function not found in ABI.');
+    throw new Error(`Function "${functionName}" not found in ABI.`);
   }
 
   return iface.encodeFunctionData(functionFragment, args);
