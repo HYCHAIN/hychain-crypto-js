@@ -273,4 +273,10 @@ describe('Unit Tests', () => {
 
     ether.should.equal('1.0');
   });
+
+  it('toSha256()', async () => {
+    const hash = await lib.toSha256('sometext');
+
+    hash.should.equal('5fb2054478353fd8d514056d1745b3a9eef066deadda4b90967af7ca65ce6505');
+  });
 });

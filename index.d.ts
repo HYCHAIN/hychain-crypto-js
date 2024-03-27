@@ -94,4 +94,6 @@ declare module 'hychain-crypto-js' {
   export function toWei(etherString: string): string;
 
   export function toEther(weiString: string): string;
+
+  export function toSha256(string: string): Promise<string>;
 }
