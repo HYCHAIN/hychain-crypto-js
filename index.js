@@ -245,7 +245,7 @@ async function generateNonceSignature(wallet, nonceBytes = 32) {
 
 function generateSessionRequestTuple(sessionRequest) {
   return [
-    sessionRequest.nativeAllowance,
+    sessionRequest.nativeAllowance || '0',
     (sessionRequest.contractFunctionSelectors || []).map(o => [ o.address, o.functionSelectors ]),
     (sessionRequest.erc20Allowances || []).map(o => [ o.address, o.allowance ]),
     (sessionRequest.erc721Allowances || []).map(o => [ o.address, o.approveAll, o.tokenIds || [] ]),

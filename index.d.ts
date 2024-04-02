@@ -11,25 +11,25 @@ declare module 'hychain-crypto-js' {
     string, // data
   ];
   export type SessionRequest = {
-    nativeAllowance: string;
-    contractFunctionSelectors: {
+    nativeAllowance?: string;
+    contractFunctionSelectors?: {
       address: string,
       functionSelectors: string[]
     }[];
-    erc20Allowances: {
+    erc20Allowances?: {
       address: string,
       allowance: string,
     }[];
-    erc721Allowances: {
+    erc721Allowances?: {
       address: string,
       approveAll: boolean,
-      tokenIds: string[],
+      tokenIds?: string[],
     }[];
-    erc1155Allowances: {
+    erc1155Allowances?: {
       address: string,
       approveAll: boolean,
-      tokenIds: string[],
-      allowances: string[],
+      tokenIds?: string[],
+      allowances?: string[],
     }[];
   };
   export type SessionRequestTuple = [
