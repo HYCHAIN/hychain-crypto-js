@@ -177,12 +177,50 @@ describe('Unit Tests', () => {
     nonceSignature.signature.length.should.equal(132);
   });
 
+  it('generateSessionRequestTuple()', async () => {
+    const sessionRequest = {
+      nativeAllowance: '100',
+      contractFunctionSelectors: [
+        {
+          address: '0xB40cdD7599d8f52C48f29E10CFBf24918C85F7cC',
+          functionSelectors: [ '0x40c10f19', '0xa22cb465' ],
+        },
+      ],
+      erc20Allowances: [
+        {
+          address: '0xcccCb68e1A848CBDB5b60a974E07aAE143ed40C3',
+          allowance: '100',
+        },
+      ],
+      erc721Allowances: [
+        {
+          address: '0x8d9710f0e193d3f95c0723eaaf1a81030dc9116d',
+          approveAll: true,
+        },
+      ],
+      erc1155Allowances: [
+        {
+          address: '0x98e62fe371519d1d07e6f5bfce04737d4dacabfd',
+          approveAll: true,
+        },
+      ],
+    };
+
+    const sessionRequestTuple = await lib.generateSessionRequestTuple(sessionRequest);
+
+    sessionRequestTuple[0].should.equal(sessionRequest.nativeAllowance);
+    sessionRequestTuple[1][0][0].should.equal(sessionRequest.contractFunctionSelectors[0].address);
+    sessionRequestTuple[2][0][0].should.equal(sessionRequest.erc20Allowances[0].address);
+    sessionRequestTuple[3][0][0].should.equal(sessionRequest.erc721Allowances[0].address);
+    sessionRequestTuple[4][0][0].should.equal(sessionRequest.erc1155Allowances[0].address);
+  });
+
   it('generateSessionSignature()', async () => {
     const wallet = lib.generateRandomWallet();
     const sessionSignature = await lib.generateSessionSignature(
       wallet,
       '0xccccb68e1a848cbdb5b60a974e07aae143ed40c3',
-      [ 0, [], [], [], [] ],
+      { nativeAllowance: '0' },
       Date.now(),
       1,
       Date.now(),

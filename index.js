@@ -243,11 +243,27 @@ async function generateNonceSignature(wallet, nonceBytes = 32) {
   return { nonce, signature };
 }
 
+function generateSessionRequestTuple(sessionRequest) {
+  return [
+    sessionRequest.nativeAllowance,
+    (sessionRequest.contractFunctionSelectors || []).map(o => [ o.address, o.functionSelectors ]),
+    (sessionRequest.erc20Allowances || []).map(o => [ o.address, o.allowance ]),
+    (sessionRequest.erc721Allowances || []).map(o => [ o.address, o.approveAll, o.tokenIds || [] ]),
+    (sessionRequest.erc1155Allowances || []).map(o => [ o.address, o.approveAll, o.tokenIds || [], o.allowances || [] ]),
+  ];
+}
+
 async function generateSessionSignature(wallet, callerAddress, sessionRequest, expiresAt, nonce, deadline, chainId) {
   const encodedSessionRequest = generateCalldataEncoding(
     [
       'address',
-      'tuple(uint256, tuple(address, bytes4[])[], tuple(address, uint256)[], tuple(address, bool, uint256[])[], tuple(address, bool, uint256[], uint256[])[])',
+      'tuple(' +
+        'uint256, ' +
+        'tuple(address, bytes4[])[], ' +
+        'tuple(address, uint256)[], ' +
+        'tuple(address, bool, uint256[])[], ' +
+        'tuple(address, bool, uint256[], uint256[])[]' +
+      ')',
       'uint256',
       'uint256',
       'uint256',
@@ -255,7 +271,7 @@ async function generateSessionSignature(wallet, callerAddress, sessionRequest, e
     ],
     [
       callerAddress,
-      sessionRequest,
+      generateSessionRequestTuple(sessionRequest),
       expiresAt,
       nonce,
       deadline,
@@ -389,6 +405,7 @@ module.exports = {
   generateCallRequestsSignature,
   generateScaCreationProofSignature,
   generateNonceSignature,
+  generateSessionRequestTuple,
   generateSessionSignature,
   generateAuthority,
   generateBackupCode,

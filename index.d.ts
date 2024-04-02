@@ -10,6 +10,35 @@ declare module 'hychain-crypto-js' {
     string, // nonce
     string, // data
   ];
+  export type SessionRequest = {
+    nativeAllowance: string;
+    contractFunctionSelectors: {
+      address: string,
+      functionSelectors: string[]
+    }[];
+    erc20Allowances: {
+      address: string,
+      allowance: string,
+    }[];
+    erc721Allowances: {
+      address: string,
+      approveAll: boolean,
+      tokenIds: string[],
+    }[];
+    erc1155Allowances: {
+      address: string,
+      approveAll: boolean,
+      tokenIds: string[],
+      allowances: string[],
+    }[];
+  };
+  export type SessionRequestTuple = [
+    string, // nativeAllowance
+    [ string, string[] ][], // contractFunctionSelectors ( address, functionSelectors: bytes4[] )
+    [ string, string ][], // erc20Allowances ( address, allowance: uint256 )
+    [ string, boolean, string[] ][], // erc721Allowances ( address, approveAll: boolean, tokenIds: uint256[])
+    [ string, boolean, string[], string[] ][], // erc1155Allowances ( address, approveAll: boolean, tokenIds: uint256[], allowances: uint256[] )
+  ];
   export type WalletCredentials = {
     address: string;
     privateKey: string;
@@ -64,6 +93,8 @@ declare module 'hychain-crypto-js' {
       nonce: string;
       signature: string;
   }>;
+
+  export function generateSessionRequestTuple(sessionRequest: SessionRequest): SessionRequestTuple;
 
   export function generateSessionSignature(wallet: Wallet, callerAddress: address, sessionRequest: SessionRequest, expiresAt: number, nonce: number, deadline: number, chainId: number): Promise<string>;
 
