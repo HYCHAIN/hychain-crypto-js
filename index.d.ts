@@ -96,7 +96,7 @@ declare module 'hychain-crypto-js' {
 
   export function generateSessionRequestTuple(sessionRequest: SessionRequest): SessionRequestTuple;
 
-  export function generateSessionSignature(wallet: Wallet, callerAddress: address, sessionRequest: SessionRequest, expiresAt: number, nonce: number, deadline: number, chainId: number): Promise<string>;
+  export function generateSessionSignature(wallet: Wallet, callerAddress: string, sessionRequest: SessionRequest, expiresAt: number, nonce: number, deadline: number, chainId: number): Promise<string>;
 
   export function generateAuthority(password: string): Promise<{
       salt: string;

@@ -243,7 +243,7 @@ async function generateNonceSignature(wallet, nonceBytes = 32) {
   return { nonce, signature };
 }
 
-function generateSessionRequestTuple(sessionRequest) {
+function generateSessionRequestTuple(sessionRequest = {}) {
   return [
     sessionRequest.nativeAllowance || '0',
     (sessionRequest.contractFunctionSelectors || []).map(o => [ o.address, o.functionSelectors ]),
