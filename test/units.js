@@ -197,7 +197,7 @@ describe('Unit Tests', () => {
     const username = 'iamarkdev';
     const email = 'ark@hychain.com';
     const password = 'testing';
-    const user = await lib.generateUser(username, email, password);
+    const user = await lib.generateUser(username, password, email);
 
     user.should.have.property('username');
     user.should.have.property('email');

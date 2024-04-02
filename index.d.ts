@@ -78,7 +78,7 @@ declare module 'hychain-crypto-js' {
 
   export function generateBackupQuestions(): string[];
 
-  export function generateUser(username: string, email: string, password: string): Promise<{
+  export function generateUser(username: string, password: string, email?: string): Promise<{
       username: string;
       email: string;
       salt: string;

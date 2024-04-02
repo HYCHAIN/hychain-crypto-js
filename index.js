@@ -311,13 +311,13 @@ function generateBackupQuestions() {
     'What was the name of your favorite teacher in school?',
     'What was your dream job as a child?',
     'What is the name of the place your wedding reception was held?',
-    'What is the first name of the person you went to your first dance with?'
+    'What is the first name of the person you went to your first dance with?',
   ];
 }
 
-async function generateUser(username, email, password) {
-  if (!username && !email && !password) {
-    throw new Error('username, email and password must be provided.');
+async function generateUser(username, password, email) {
+  if (!username && !password) {
+    throw new Error('username and password must be provided.');
   }
 
   const authority = await generateAuthority(password);
