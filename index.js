@@ -145,7 +145,7 @@ function generateRandomWallet() {
   });
 }
 
-function generateCallRequestDataFromAbi(abi, functionName, args) {
+function generateCallRequestDataFromAbi(abi, functionName, args = []) {
   const iface = new ethers.Interface(abi);
   const functionFragment = iface.getFunction(functionName);
 
@@ -156,7 +156,7 @@ function generateCallRequestDataFromAbi(abi, functionName, args) {
   return iface.encodeFunctionData(functionFragment, args);
 }
 
-function generateCallRequestDataFromFunctionSignature(functionSignature, args) {
+function generateCallRequestDataFromFunctionSignature(functionSignature, args = []) {
   const functionName = functionSignature.split('(')[0];
   const parametersList = functionSignature.slice(functionSignature.indexOf('(') + 1, functionSignature.lastIndexOf(')'));
 
