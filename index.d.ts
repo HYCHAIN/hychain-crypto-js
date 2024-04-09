@@ -1,5 +1,7 @@
+import { Interface } from 'mocha';
+
 declare module 'hychain-crypto-js' {
-  import { Wallet } from 'ethers';
+  import { InterfaceAbi, Wallet } from 'ethers';
 
   export type Ciphertext = string;
   export type PBKDF2Key = string;
@@ -75,13 +77,13 @@ declare module 'hychain-crypto-js' {
   
   export function generateRandomWallet(): Wallet;
   
-  export function generateCallRequestDataFromAbi(abi: any[], functionName: string, args?: any[]): CallRequestData;
+  export function generateCallRequestDataFromAbi(abi: InterfaceAbi, functionName: string, args?: any[]): CallRequestData;
 
   export function generateCallRequestDataFromFunctionSignature(functionSignature: string, args?: any[]): CallRequestData;
 
   export function generateCallRequest(target: string, value: string, nonce?: string, data?: CallRequestData): CallRequest;
 
-  export function generateCalldataEncoding(abi: any[], values: any[]): string;
+  export function generateCalldataEncoding(abi: InterfaceAbi, values: any[]): string;
 
   export function generateCallRequestSignature(wallet: Wallet, callRequest: CallRequest, deadline: number, chainId: number): Promise<string>;
 
