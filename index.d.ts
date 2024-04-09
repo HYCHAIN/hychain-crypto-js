@@ -85,20 +85,20 @@ declare module 'hychain-crypto-js' {
 
   export function generateCalldataEncoding(abi: InterfaceAbi, values: any[]): string;
 
-  export function generateCallRequestSignature(wallet: Wallet, callRequest: CallRequest, deadline: number, chainId: number): Promise<string>;
+  export function generateCallRequestSignature(wallet: Wallet, callRequest: CallRequest, deadline: string, chainId: string): Promise<string>;
 
-  export function generateCallRequestsSignature(wallet: Wallet, callRequest: CallRequest[], deadline: number, chainId: number): Promise<string>;
+  export function generateCallRequestsSignature(wallet: Wallet, callRequest: CallRequest[], deadline: string, chainId: string): Promise<string>;
 
   export function generateScaCreationProofSignature(wallet: Wallet): Promise<string>;
 
-  export function generateNonceSignature(wallet: Wallet, nonceBytes?: number): Promise<{
+  export function generateNonceSignature(wallet: Wallet, nonceBytes?: string): Promise<{
       nonce: string;
       signature: string;
   }>;
 
   export function generateSessionRequestTuple(sessionRequest: SessionRequest): SessionRequestTuple;
 
-  export function generateSessionSignature(wallet: Wallet, callerAddress: string, sessionRequest: SessionRequest, expiresAt: number, nonce: number, deadline: number, chainId: number): Promise<string>;
+  export function generateSessionSignature(wallet: Wallet, callerAddress: string, sessionRequest: SessionRequest, expiresAt: string, nonce: string, deadline: string, chainId: string): Promise<string>;
 
   export function generateAuthority(password: string): Promise<{
       salt: string;
