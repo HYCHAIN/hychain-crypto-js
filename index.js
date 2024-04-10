@@ -14,7 +14,10 @@ const CHAIN_IDS = {
  * Public
  */
 
-async function aesEncrypt(plaintext, pbkdf2Key) {
+async function aesEncrypt(
+  plaintext, 
+  pbkdf2Key,
+) {
   const keyBuffer = new Uint8Array(pbkdf2Key.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const plaintextBuffer = new TextEncoder().encode(plaintext);
@@ -25,7 +28,10 @@ async function aesEncrypt(plaintext, pbkdf2Key) {
   return Array.from(new Uint8Array([ ...iv, ...new Uint8Array(ciphertext) ])).map(byte => byte.toString(16).padStart(2, '0')).join('');
 }
 
-async function aesDecrypt(ciphertext, pbkdf2Key) {
+async function aesDecrypt(
+  ciphertext, 
+  pbkdf2Key,
+) {
   const keyBuffer = new Uint8Array(pbkdf2Key.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
   const ciphertextBuffer = new Uint8Array(ciphertext.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
 
@@ -38,7 +44,11 @@ async function aesDecrypt(ciphertext, pbkdf2Key) {
   return new TextDecoder().decode(plaintextBuffer);
 }
 
-async function aesEncryptWalletWithPassword(wallet, password, salt) {
+async function aesEncryptWalletWithPassword(
+  wallet, 
+  password, 
+  salt,
+) {
   try {
     const key = await pbkdf2(password, salt);
 
@@ -48,7 +58,11 @@ async function aesEncryptWalletWithPassword(wallet, password, salt) {
   }
 }
 
-async function aesDecryptWalletWithPassword(ciphertext, password, salt) {
+async function aesDecryptWalletWithPassword(
+  ciphertext, 
+  password,
+  salt,
+) {
   try {
     const key = await pbkdf2(password, salt);
     const walletCredentials = JSON.parse(await aesDecrypt(ciphertext, key));
@@ -59,7 +73,11 @@ async function aesDecryptWalletWithPassword(ciphertext, password, salt) {
   }
 }
 
-async function aesEncryptWalletWithBackupCode(wallet, code, salt) {
+async function aesEncryptWalletWithBackupCode(
+  wallet,
+  code,
+  salt,
+) {
   if (code.length < 10) { throw new Error('code must be at least 10 characters.'); }
 
   try {
@@ -71,7 +89,11 @@ async function aesEncryptWalletWithBackupCode(wallet, code, salt) {
   }
 }
 
-async function aesDecryptWalletWithBackupCode(ciphertext, code, salt) {
+async function aesDecryptWalletWithBackupCode(
+  ciphertext,
+  code,
+  salt,
+) {
   try {
     const key = await pbkdf2(code, salt);
     const walletCredentials = JSON.parse(await aesDecrypt(ciphertext, key));
@@ -82,7 +104,11 @@ async function aesDecryptWalletWithBackupCode(ciphertext, code, salt) {
   }
 }
 
-async function aesEncryptWalletWithBackupQuestionAnswers(wallet, answers, salt) {
+async function aesEncryptWalletWithBackupQuestionAnswers(
+  wallet,
+  answers,
+  salt,
+) {
   try {
     const key = await pbkdf2(answers.join(','), salt);
 
@@ -92,7 +118,11 @@ async function aesEncryptWalletWithBackupQuestionAnswers(wallet, answers, salt) 
   }
 }
 
-async function aesDecryptWalletWithBackupQuestionAnswers(ciphertext, answers, salt) {
+async function aesDecryptWalletWithBackupQuestionAnswers(
+  ciphertext,
+  answers,
+  salt,
+) {
   try {
     const key = await pbkdf2(answers.join(','), salt);
     const walletCredentials = JSON.parse(await aesDecrypt(ciphertext, key));
@@ -103,7 +133,10 @@ async function aesDecryptWalletWithBackupQuestionAnswers(ciphertext, answers, sa
   }
 }
 
-async function pbkdf2(password, salt) {
+async function pbkdf2(
+  password,
+  salt,
+) {
   const keyMaterial = await crypto.subtle.importKey(
     'raw',
     new TextEncoder().encode(password),
@@ -145,7 +178,11 @@ function generateRandomWallet() {
   });
 }
 
-function generateCallRequestDataFromAbi(abi, functionName, args = []) {
+function generateCallRequestDataFromAbi(
+  abi,
+  functionName,
+  args = [],
+) {
   const iface = new ethers.Interface(abi);
   const functionFragment = iface.getFunction(functionName);
 
@@ -156,7 +193,10 @@ function generateCallRequestDataFromAbi(abi, functionName, args = []) {
   return iface.encodeFunctionData(functionFragment, args);
 }
 
-function generateCallRequestDataFromFunctionSignature(functionSignature, args = []) {
+function generateCallRequestDataFromFunctionSignature(
+  functionSignature,
+  args = [],
+) {
   const functionName = functionSignature.split('(')[0];
   const parametersList = functionSignature.slice(functionSignature.indexOf('(') + 1, functionSignature.lastIndexOf(')'));
 
@@ -186,49 +226,101 @@ function generateCallRequestDataFromFunctionSignature(functionSignature, args = 
   return functionSelector + encodedArgs.substring(2);
 }
 
-function generateCallRequest(target, value, nonce = generateRandomNonce(), data = '0x') {
+function generateCallRequest(
+  target,
+  value,
+  nonce = generateRandomNonce(),
+  data = '0x',
+) {
   return [ target, value, nonce, data ];
 }
 
-function generateCalldataEncoding(types, values) {
+function generateCalldataEncoding(
+  types,
+  values,
+) {
   return ethers.AbiCoder.defaultAbiCoder().encode(types, values);
 }
 
-async function generateCallRequestSignature(wallet, callRequest, deadline, chainId) {
-  const encodedCallRequest = generateCalldataEncoding(
-    [
-      'tuple(address, uint256, uint256, bytes)',
-      'uint256',
-      'uint256',
-    ],
-    [
-      callRequest,
-      deadline,
-      chainId,
-    ],
-  );
+async function generateCallSignature(
+  wallet,
+  target,
+  abi,
+  functionName,
+  args,
+  value,
+  nonce,
+  deadline,
+  chainId,
+) {
+  const callData = abi
+    ? generateCallRequestDataFromAbi(abi, functionName, args)
+    : functionName 
+      ? generateCallRequestDataFromFunctionSignature(functionName, args) 
+      : '0x';
+
+  const callRequest = generateCallRequest(target, value, nonce, callData);
 
   return await wallet.signMessage(
-    ethers.getBytes(ethers.keccak256(encodedCallRequest)),
+    ethers.getBytes(
+      ethers.keccak256(
+        generateCalldataEncoding(
+          [
+            'tuple(address, uint256, uint256, bytes)',
+            'uint256',
+            'uint256',
+          ],
+          [
+            callRequest,
+            deadline,
+            chainId,
+          ],
+        ),
+      ),
+    ),
   );
 }
 
-async function generateCallRequestsSignature(wallet, callRequests, deadline, chainId) {
-  const encodedCallRequests = generateCalldataEncoding(
-    [
-      'tuple(address, uint256, uint256, bytes)[]',
-      'uint256',
-      'uint256',
-    ],
-    [
-      callRequests,
-      deadline,
-      chainId,
-    ],
-  );
+async function generateCallsSignature(
+  wallet,
+  targets,
+  abis,
+  functionNames,
+  args,
+  values,
+  nonces,
+  deadline,
+  chainId,
+) {
+  const callRequests = targets.map((target, i) => {
+    const abi = abis[i];
+    const functionName = functionNames[i];
+    const callData = abi
+      ? generateCallRequestDataFromAbi(abi, functionName, args[i])
+      : functionName 
+        ? generateCallRequestDataFromFunctionSignature(functionName, args[i])
+        : '0x';
+
+    return generateCallRequest(target, values[i], nonces[i], callData);
+  });
 
   return await wallet.signMessage(
-    ethers.getBytes(ethers.keccak256(encodedCallRequests)),
+    ethers.getBytes(
+      ethers.keccak256(
+        generateCalldataEncoding(
+          [
+            'tuple(address, uint256, uint256, bytes)[]',
+            'uint256',
+            'uint256',
+          ],
+          [
+            callRequests,
+            deadline,
+            chainId,
+          ],
+        ),
+      ),
+    ),
   );
 }
 
@@ -253,7 +345,15 @@ function generateSessionRequestTuple(sessionRequest = {}) {
   ];
 }
 
-async function generateSessionSignature(wallet, callerAddress, sessionRequest, expiresAt, nonce, deadline, chainId) {
+async function generateSessionSignature(
+  wallet,
+  callerAddress,
+  sessionRequest,
+  expiresAt,
+  nonce,
+  deadline,
+  chainId,
+) {
   const encodedSessionRequest = generateCalldataEncoding(
     [
       'address',
@@ -331,7 +431,11 @@ function generateBackupQuestions() {
   ];
 }
 
-async function generateUser(username, password, email) {
+async function generateUser(
+  username,
+  password,
+  email,
+) {
   if (!username && !password) {
     throw new Error('username and password must be provided.');
   }
@@ -401,8 +505,8 @@ module.exports = {
   generateCallRequestDataFromFunctionSignature,
   generateCallRequest,
   generateCalldataEncoding,
-  generateCallRequestSignature,
-  generateCallRequestsSignature,
+  generateCallSignature,
+  generateCallsSignature,
   generateScaCreationProofSignature,
   generateNonceSignature,
   generateSessionRequestTuple,

@@ -129,36 +129,44 @@ describe('Unit Tests', () => {
     calldataEncoding.should.equal('0x000000000000000000000000ccccb68e1a848cbdb5b60a974e07aae143ed40c3000000000000000000000000000000000000000000000000000000000003d58b');
   });
 
-  it('generateCallRequestSignature()', async () => {
+  it('generateCallSignature()', async () => {
     const wallet = lib.generateRandomWallet();
-    const callRequest = lib.generateCallRequest(
-      '0xccccb68e1a848cbdb5b60a974e07aae143ed40c3',
-      lib.toWei('2.0'),
-    );
     const deadline = Math.floor(Date.now()/ 1000);
     const chainId = lib.CHAIN_IDS['HYCHAIN'];
-    const callRequestSignature = await lib.generateCallRequestSignature(wallet, callRequest, deadline, chainId);
 
-    callRequestSignature.length.should.equal(132);
+    const callSignature = await lib.generateCallSignature(
+      wallet, 
+      '0xccccb68e1a848cbdb5b60a974e07aae143ed40c3', 
+      null, 
+      null, 
+      null, 
+      lib.toWei('2.0'), 
+      '3',
+      deadline, 
+      chainId,
+    );
+
+    callSignature.length.should.equal(132);
   });
 
-  it('generateCallRequestsSignature()', async () => {
+  it('generateCallsSignature()', async () => {
     const wallet = lib.generateRandomWallet();
-    const callRequests = [
-      lib.generateCallRequest(
-        '0xccccb68e1a848cbdb5b60a974e07aae143ed40c3',
-        lib.toWei('2.0'),
-      ),
-      lib.generateCallRequest(
-        '0x4355e3DAc64C3Cd555E60BA829b27e4E44802B6b',
-        lib.toWei('5.0'),
-      ),
-    ];
     const deadline = Math.floor(Date.now()/ 1000);
     const chainId = lib.CHAIN_IDS['HYCHAIN'];
-    const callRequestSignature = await lib.generateCallRequestsSignature(wallet, callRequests, deadline, chainId);
+    
+    const callsSignature = await lib.generateCallsSignature(
+      wallet,
+      [ '0xccccb68e1a848cbdb5b60a974e07aae143ed40c3', '0x4355e3DAc64C3Cd555E60BA829b27e4E44802B6b' ],
+      [],
+      [],
+      [],
+      [ lib.toWei('2.0'), lib.toWei('5.0') ],
+      [ '1', '2' ],
+      deadline,
+      chainId,
+    );
 
-    callRequestSignature.length.should.equal(132);
+    callsSignature.length.should.equal(132);
   });
 
   it('generateScaCreationProofSignature()', async () => {
