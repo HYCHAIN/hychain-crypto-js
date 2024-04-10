@@ -242,7 +242,31 @@ function generateCalldataEncoding(
   return ethers.AbiCoder.defaultAbiCoder().encode(types, values);
 }
 
-async function generateCallSignature(
+async function generateCallRequestSignature(
+  wallet,
+  callRequest,
+  deadline,
+  chainId,
+) {
+  const encodedCallRequest = generateCalldataEncoding(
+    [
+      'tuple(address, uint256, uint256, bytes)',
+      'uint256',
+      'uint256',
+    ],
+    [
+      callRequest,
+      deadline,
+      chainId,
+    ],
+  );
+
+  return await wallet.signMessage(
+    ethers.getBytes(ethers.keccak256(encodedCallRequest)),
+  );
+}
+
+async function generateCallRequirements(
   wallet,
   target,
   abi,
@@ -261,27 +285,36 @@ async function generateCallSignature(
 
   const callRequest = generateCallRequest(target, value, nonce, callData);
 
+  const signature = await generateCallRequestSignature(wallet, callRequest, deadline, chainId);
+
+  return { callRequest, signature, deadline, chainId };
+}
+
+async function generateMulticallSignature(
+  wallet,
+  callRequests,
+  deadline,
+  chainId,
+) {
+  const encodedCallRequests = generateCalldataEncoding(
+    [
+      'tuple(address, uint256, uint256, bytes)[]',
+      'uint256',
+      'uint256',
+    ],
+    [
+      callRequests,
+      deadline,
+      chainId,
+    ],
+  );
+
   return await wallet.signMessage(
-    ethers.getBytes(
-      ethers.keccak256(
-        generateCalldataEncoding(
-          [
-            'tuple(address, uint256, uint256, bytes)',
-            'uint256',
-            'uint256',
-          ],
-          [
-            callRequest,
-            deadline,
-            chainId,
-          ],
-        ),
-      ),
-    ),
+    ethers.getBytes(ethers.keccak256(encodedCallRequests)),
   );
 }
 
-async function generateCallsSignature(
+async function generateMulticallRequirements(
   wallet,
   targets,
   abis,
@@ -304,24 +337,9 @@ async function generateCallsSignature(
     return generateCallRequest(target, values[i], nonces[i], callData);
   });
 
-  return await wallet.signMessage(
-    ethers.getBytes(
-      ethers.keccak256(
-        generateCalldataEncoding(
-          [
-            'tuple(address, uint256, uint256, bytes)[]',
-            'uint256',
-            'uint256',
-          ],
-          [
-            callRequests,
-            deadline,
-            chainId,
-          ],
-        ),
-      ),
-    ),
-  );
+  const signature = await generateMulticallSignature(wallet, callRequests, deadline, chainId);
+
+  return { callRequests, signature, deadline, chainId };
 }
 
 async function generateScaCreationProofSignature(wallet) {
@@ -505,8 +523,10 @@ module.exports = {
   generateCallRequestDataFromFunctionSignature,
   generateCallRequest,
   generateCalldataEncoding,
-  generateCallSignature,
-  generateCallsSignature,
+  generateCallRequestSignature,
+  generateCallRequirements,
+  generateMulticallSignature,
+  generateMulticallRequirements,
   generateScaCreationProofSignature,
   generateNonceSignature,
   generateSessionRequestTuple,

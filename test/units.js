@@ -129,12 +129,25 @@ describe('Unit Tests', () => {
     calldataEncoding.should.equal('0x000000000000000000000000ccccb68e1a848cbdb5b60a974e07aae143ed40c3000000000000000000000000000000000000000000000000000000000003d58b');
   });
 
-  it('generateCallSignature()', async () => {
+  it('generateCallRequestSignature()', async () => {
+    const wallet = lib.generateRandomWallet();
+    const callRequest = lib.generateCallRequest(
+      '0xccccb68e1a848cbdb5b60a974e07aae143ed40c3',
+      lib.toWei('2.0'),
+    );
+    const deadline = Math.floor(Date.now()/ 1000);
+    const chainId = lib.CHAIN_IDS['HYCHAIN'];
+    const callRequestSignature = await lib.generateCallRequestSignature(wallet, callRequest, deadline, chainId);
+
+    callRequestSignature.length.should.equal(132);
+  });
+
+  it('generateCallRequirements()', async () => {
     const wallet = lib.generateRandomWallet();
     const deadline = Math.floor(Date.now()/ 1000);
     const chainId = lib.CHAIN_IDS['HYCHAIN'];
 
-    const callSignature = await lib.generateCallSignature(
+    const callRequirements = await lib.generateCallRequirements(
       wallet, 
       '0xccccb68e1a848cbdb5b60a974e07aae143ed40c3', 
       null, 
@@ -146,15 +159,38 @@ describe('Unit Tests', () => {
       chainId,
     );
 
-    callSignature.length.should.equal(132);
+    callRequirements.should.be.an('object');
+    callRequirements.callRequest.should.be.an('array');
+    callRequirements.signature.should.be.a('string');
+    callRequirements.deadline.should.be.a('number');
+    callRequirements.chainId.should.be.a('number');
   });
 
-  it('generateCallsSignature()', async () => {
+  it('generateMulticallSignature()', async () => {
+    const wallet = lib.generateRandomWallet();
+    const callRequests = [
+      lib.generateCallRequest(
+        '0xccccb68e1a848cbdb5b60a974e07aae143ed40c3',
+        lib.toWei('2.0'),
+      ),
+      lib.generateCallRequest(
+        '0x4355e3DAc64C3Cd555E60BA829b27e4E44802B6b',
+        lib.toWei('5.0'),
+      ),
+    ];
+    const deadline = Math.floor(Date.now()/ 1000);
+    const chainId = lib.CHAIN_IDS['HYCHAIN'];
+    const callRequestSignature = await lib.generateMulticallSignature(wallet, callRequests, deadline, chainId);
+
+    callRequestSignature.length.should.equal(132);
+  });
+
+  it('generateMulticallRequirements()', async () => {
     const wallet = lib.generateRandomWallet();
     const deadline = Math.floor(Date.now()/ 1000);
     const chainId = lib.CHAIN_IDS['HYCHAIN'];
     
-    const callsSignature = await lib.generateCallsSignature(
+    const multicallRequirements = await lib.generateMulticallRequirements(
       wallet,
       [ '0xccccb68e1a848cbdb5b60a974e07aae143ed40c3', '0x4355e3DAc64C3Cd555E60BA829b27e4E44802B6b' ],
       [],
@@ -166,7 +202,11 @@ describe('Unit Tests', () => {
       chainId,
     );
 
-    callsSignature.length.should.equal(132);
+    multicallRequirements.should.be.an('object');
+    multicallRequirements.callRequests[0].should.be.an('array');
+    multicallRequirements.signature.should.be.a('string');
+    multicallRequirements.deadline.should.be.a('number');
+    multicallRequirements.chainId.should.be.a('number');
   });
 
   it('generateScaCreationProofSignature()', async () => {

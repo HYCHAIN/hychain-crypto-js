@@ -135,7 +135,14 @@ declare module 'hychain-crypto-js' {
     values: any[]
   ): string;
 
-  export function generateCallSignature(
+  export function generateCallRequestSignature(
+    wallet: Wallet,
+    callRequest: CallRequest,
+    deadline: number,
+    chainId: number
+  ): Promise<string>;
+
+  export function generateCallRequirements(
     wallet: Wallet,
     target: string,
     abi: InterfaceAbi | Nullable,
@@ -145,9 +152,21 @@ declare module 'hychain-crypto-js' {
     nonce: string,
     deadline: number, 
     chainId: number
+  ): Promise<{
+    callRequest: CallRequest;
+    signature: string;
+    deadline: number;
+    chainId: number;
+  }>;
+
+  export function generateMulticallSignature(
+    wallet: Wallet,
+    callRequest: CallRequest[],
+    deadline: number,
+    chainId: number
   ): Promise<string>;
 
-  export function generateCallsSignature(
+  export function generateMulticallRequirements(
     wallet: Wallet, 
     targets: string[], 
     abis: (InterfaceAbi | Nullable)[], 
@@ -157,7 +176,12 @@ declare module 'hychain-crypto-js' {
     nonces: string[],
     deadline: number, 
     chainId: number
-  ): Promise<string>;
+  ): Promise<{
+    callRequests: CallRequest[];
+    signature: string;
+    deadline: number;
+    chainId: number;
+  }>;
 
   export function generateScaCreationProofSignature(
     wallet: Wallet
