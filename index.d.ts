@@ -111,6 +111,10 @@ declare module 'hychain-crypto-js' {
   export function generateRandomSalt(): string;
   
   export function generateRandomWallet(): Wallet;
+
+  export function generateFunctionSelectorAndTypesFromFunctionSignature(
+    functionSignature: string
+  ): { selector: string, types: string[] };
   
   export function generateCallRequestDataFromAbi(
     abi: InterfaceAbi, 
