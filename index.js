@@ -178,25 +178,7 @@ function generateRandomWallet() {
   });
 }
 
-function generateCallRequestDataFromAbi(
-  abi,
-  functionName,
-  args = [],
-) {
-  const iface = new ethers.Interface(abi);
-  const functionFragment = iface.getFunction(functionName);
-
-  if (!functionFragment) {
-    throw new Error(`Function "${functionName}" not found in ABI.`);
-  }
-
-  return iface.encodeFunctionData(functionFragment, args);
-}
-
-function generateCallRequestDataFromFunctionSignature(
-  functionSignature,
-  args = [],
-) {
+function generateFunctionSelectorAndTypesFromFunctionSignature(functionSignature) {
   const functionName = functionSignature.split('(')[0];
   const parametersList = functionSignature.slice(functionSignature.indexOf('(') + 1, functionSignature.lastIndexOf(')'));
 
@@ -220,10 +202,36 @@ function generateCallRequestDataFromFunctionSignature(
   types = types.map(type => type.lastIndexOf(' ') !== -1 ? type.slice(0, type.lastIndexOf(' ')) : type);
 
   const canonincalFunctionSignature = `${functionName}(${types.join(',')})`;
-  const functionSelector = ethers.id(canonincalFunctionSignature).substring(0, 10);
+  
+  return {
+    selector: ethers.id(canonincalFunctionSignature).substring(0, 10),
+    types,
+  };
+}
+
+function generateCallRequestDataFromAbi(
+  abi,
+  functionName,
+  args = [],
+) {
+  const iface = new ethers.Interface(abi);
+  const functionFragment = iface.getFunction(functionName);
+
+  if (!functionFragment) {
+    throw new Error(`Function "${functionName}" not found in ABI.`);
+  }
+
+  return iface.encodeFunctionData(functionFragment, args);
+}
+
+function generateCallRequestDataFromFunctionSignature(
+  functionSignature,
+  args = [],
+) {
+  const { selector, types } = generateFunctionSelectorAndTypesFromFunctionSignature(functionSignature);
   const encodedArgs = generateCalldataEncoding(types, args);
 
-  return functionSelector + encodedArgs.substring(2);
+  return selector + encodedArgs.substring(2);
 }
 
 function generateCallRequest(
@@ -519,6 +527,7 @@ module.exports = {
   generateRandomNonce,
   generateRandomSalt,
   generateRandomWallet,
+  generateFunctionSelectorAndTypesFromFunctionSignature,
   generateCallRequestDataFromAbi,
   generateCallRequestDataFromFunctionSignature,
   generateCallRequest,

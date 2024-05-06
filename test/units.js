@@ -70,6 +70,15 @@ describe('Unit Tests', () => {
     wallet.address.should.not.equal(wallet2.address);
   });
 
+  it('generateFunctionSelectorAndTypesFromFunctionSignature()', () => {
+    const { selector, types } = lib.generateFunctionSelectorAndTypesFromFunctionSignature('transfer(address,uint256)');
+
+    selector.should.equal('0xa9059cbb');
+    types.should.be.an('array');
+    types[0].should.equal('address');
+    types[1].should.equal('uint256');
+  });
+
   it('generateCallRequestDataFromAbi()', () => {
     const abi = [
       {
