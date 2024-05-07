@@ -240,7 +240,7 @@ describe('Unit Tests', () => {
       contractFunctionSelectors: [
         {
           address: '0xB40cdD7599d8f52C48f29E10CFBf24918C85F7cC',
-          functionSelectors: [ '0x40c10f19', 'setApprovalForAll(address,bool)' ],
+          functionSelectors: [ '0x40c10f19', 'registerVoters(address[], uint256, uint256[2], tuple(uint256, string, address)[])' ],
         },
       ],
       erc20Allowances: [
