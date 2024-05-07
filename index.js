@@ -362,9 +362,11 @@ async function generateNonceSignature(wallet, nonceBytes = 32) {
 }
 
 function generateSessionRequestTuple(sessionRequest = {}) {
+  const transformSelectors = s => !s.startsWith('0x') ? generateFunctionSelectorAndTypesFromFunctionSignature(s).selector : s;
+
   return [
     sessionRequest.nativeAllowance || '0',
-    (sessionRequest.contractFunctionSelectors || []).map(o => [ o.address, o.functionSelectors ]),
+    (sessionRequest.contractFunctionSelectors || []).map(o => [ o.address, o.functionSelectors.map(transformSelectors) ]),
     (sessionRequest.erc20Allowances || []).map(o => [ o.address, o.allowance ]),
     (sessionRequest.erc721Allowances || []).map(o => [ o.address, o.approveAll, o.tokenIds || [] ]),
     (sessionRequest.erc1155Allowances || []).map(o => [ o.address, o.approveAll, o.tokenIds || [], o.allowances || [] ]),
