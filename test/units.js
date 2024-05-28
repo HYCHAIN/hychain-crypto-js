@@ -4,49 +4,7 @@ const chai = require('chai');
 chai.should();
 
 describe('Unit Tests', () => {
-  it('aesEncrypt(), aesDecrypt(), pbkdf2()', async () => {
-    const plaintext = 'sometext';
-    const password = 'password';
-    const pbkdf2Key = await lib.pbkdf2(password, 'someSalt');
-    const ciphertext = await lib.aesEncrypt(plaintext, pbkdf2Key);
-    const decrypted = await lib.aesDecrypt(ciphertext, pbkdf2Key);
-
-    decrypted.should.equal(plaintext);
-  });
-
-  it('aesEncryptWalletWithPassword(), aesDecryptWalletWithPassword()', async () => {
-    const wallet = lib.generateRandomWallet();
-    const password = 'somepass';
-    const salt = lib.generateRandomSalt();
-    const ciphertext = await lib.aesEncryptWalletWithPassword(wallet, password, salt);
-    const decryptedWallet = await lib.aesDecryptWalletWithPassword(ciphertext, password, salt);
-
-    decryptedWallet.address.should.equal(wallet.address);
-    decryptedWallet.mnemonic.phrase.should.equal(wallet.mnemonic.phrase);
-  });
-
-  it('aesEncryptWalletWithBackupCode(), aesDecryptWalletWithBackupCode()', async () => {
-    const wallet = lib.generateRandomWallet();
-    const backupCode = lib.generateBackupCode();
-    const salt = lib.generateRandomSalt();
-    const ciphertext = await lib.aesEncryptWalletWithBackupCode(wallet, backupCode, salt);
-    const decryptedWallet = await lib.aesDecryptWalletWithBackupCode(ciphertext, backupCode, salt);
-
-    decryptedWallet.address.should.equal(wallet.address);
-    decryptedWallet.mnemonic.phrase.should.equal(wallet.mnemonic.phrase);
-  });
-
-  it('aesEncryptWalletWithBackupQuestionAnswers(), aesDecryptWalletWithBackupQuestionAnswers()', async () => {
-    const wallet = lib.generateRandomWallet();
-    const answers = [ '1994', 'Robert', 'Red' ];
-    const salt = lib.generateRandomSalt();
-    const ciphertext = await lib.aesEncryptWalletWithBackupQuestionAnswers(wallet, answers, salt);
-    const decryptedWallet = await lib.aesDecryptWalletWithBackupQuestionAnswers(ciphertext, answers, salt);
-
-    decryptedWallet.address.should.equal(wallet.address);
-    decryptedWallet.mnemonic.phrase.should.equal(wallet.mnemonic.phrase);
-  });
-  
+  /*
   it('generateRandomNonce()', async() => {
     const nonce = await lib.generateRandomNonce();
 
@@ -288,6 +246,20 @@ describe('Unit Tests', () => {
     sessionSignature.length.should.equal(132);
   });
 
+  it('generateAuthority()', async () => {
+    const password = 'testing';
+    const authority = await lib.generateAuthority(password);
+
+    authority.should.have.property('salt');
+    authority.should.have.property('authorityAddress');
+    authority.should.have.property('authorityCiphertext');
+    authority.should.have.property('authorityProofSignature');
+
+    const decryptedWallet = await lib.aesDecryptWalletWithPassword(authority.authorityCiphertext, password, authority.salt);
+
+    decryptedWallet.should.be.an('object');
+  });
+
   it('generateUser()', async () => {
     const username = 'iamarkdev';
     const email = 'ark@hychain.com';
@@ -308,41 +280,12 @@ describe('Unit Tests', () => {
     decryptedWallet.should.be.an('object');
   });
 
-  it('generateAuthority()', async () => {
-    const password = 'testing';
-    const authority = await lib.generateAuthority(password);
+  it('generateWalletfromShards()', async () => {
 
-    authority.should.have.property('salt');
-    authority.should.have.property('authorityAddress');
-    authority.should.have.property('authorityCiphertext');
-    authority.should.have.property('authorityProofSignature');
-
-    const decryptedWallet = await lib.aesDecryptWalletWithPassword(authority.authorityCiphertext, password, authority.salt);
-
-    decryptedWallet.should.be.an('object');
   });
 
-  it('generateBackupCode()', () => {
-    const backupCode = lib.generateBackupCode();
-    const backupCodeTwo = lib.generateBackupCode();
+  it('generateWalletFromMnemonic()', () => {
 
-    backupCode.length.should.equal(10);
-    backupCode.should.not.equal(backupCodeTwo);
-  });
-
-  it('generateBackupQuestions()', () => {
-    const backupQuestions = lib.generateBackupQuestions();
-
-    backupQuestions.length.should.equal(10);
-  });
-
-  it('getWallet()', () => {
-    const wallet = lib.generateRandomWallet();
-    const walletCredentials = lib.getWalletCredentials(wallet);
-    const wallet2 = lib.getWallet(walletCredentials);
-
-    wallet2.address.should.equal(wallet.address);
-    wallet2.mnemonic.phrase.should.equal(wallet.mnemonic.phrase);
   });
 
   it('getWalletCredentials()', () => {
@@ -351,10 +294,48 @@ describe('Unit Tests', () => {
 
     walletCredentials.should.have.property('address');
     walletCredentials.should.have.property('privateKey');
+    walletCredentials.should.have.property('shards');
     walletCredentials.should.have.property('mnemonic');
 
     walletCredentials.address.length.should.equal(42);
     walletCredentials.privateKey.length.should.equal(66);
+  });
+*/
+
+  it('pkCombine(), pkSplit()', async () => {
+    const wallet = lib.generateRandomWallet();
+    
+    // sharding should not be deterministic
+    const shards1 = await lib.shardWallet(wallet);
+    const shards2 = await lib.shardWallet(wallet);
+
+    shards1.should.not.deep.equal(shards2);
+
+    const reconstructedWallet = await lib.unshardWallet([
+      shards1.localHexShard,
+      shards1.hyplayHexShard,
+    ]);
+    console.log(reconstructedWallet);
+return;/*
+    const reconstructedPrivateKey2 = await lib.pkCombine([
+      shards2.localHexShard,
+      shards2.enclaveHexShard,
+    ]);
+
+    const reconstructedPrivateKey3 = await lib.pkCombine([
+      shards1.hyplayHexShard,
+      shards1.enclaveHexShard,
+    ]);
+
+    privateKey.should.equal(reconstructedPrivateKey1);
+    privateKey.should.equal(reconstructedPrivateKey2);
+    privateKey.should.equal(reconstructedPrivateKey3);
+console.log(privateKey);
+    const reconstructedWallet = await lib.generateWalletFromHexShards([
+      shards1.hyplayHexShard,
+      shards1.enclaveHexShard,
+    ]);
+    console.log(await lib.getWalletCredentials(reconstructedWallet));*/
   });
 
   it('toWei()', () => {

@@ -55,57 +55,6 @@ declare module 'hychain-crypto-js' {
       LOCAL: number;
   };
 
-  export function aesEncrypt(
-    plaintext: string, 
-    key: PBKDF2Key
-  ): Promise<Ciphertext>;
-  
-  export function aesDecrypt(
-    ciphertext: Ciphertext, 
-    key: PBKDF2Key
-  ): Promise<string>;
-
-  export function aesEncryptWalletWithPassword(
-    wallet: Wallet, 
-    password: string, 
-    salt: string
-  ): Promise<Ciphertext>;
-  
-  export function aesDecryptWalletWithPassword(
-    ciphertext: Ciphertext,
-    password: string, 
-    salt: string
-  ): Promise<Wallet>;
-  
-  export function aesEncryptWalletWithBackupCode(
-    wallet: Wallet, 
-    code: string, 
-    salt: string
-  ): Promise<Ciphertext>;
-
-  export function aesDecryptWalletWithBackupCode(
-    ciphertext: Ciphertext, 
-    code: string, 
-    salt: string
-  ): Promise<Wallet>;
-
-  export function aesEncryptWalletWithBackupQuestionAnswers(
-    wallet: Wallet, 
-    answers: string[], 
-    salt: string
-  ): Promise<Ciphertext>;
-
-  export function aesDecryptWalletWithBackupQuestionAnswers(
-    ciphertext: Ciphertext, 
-    answers: string[], 
-    salt: string
-  ): Promise<Wallet>;
-
-  export function pbkdf2(
-    password: string, 
-    salt: string
-  ): Promise<PBKDF2Key>;
-
   export function generateRandomNonce(): string;
 
   export function generateRandomSalt(): string;
@@ -222,10 +171,6 @@ declare module 'hychain-crypto-js' {
     authorityProofSignature: string;
   }>;
 
-  export function generateBackupCode(): string;
-
-  export function generateBackupQuestions(): string[];
-
   export function generateUser(
     username: string,
     password: string,
@@ -239,13 +184,17 @@ declare module 'hychain-crypto-js' {
     authorityProofSignature: string;
   }>;
 
-  export function getWallet(
-    walletCredentials: WalletCredentials
-  ): Wallet;
+  export function generateWalletFromShards(shards: string[]): Wallet;
+
+  export function generateWalletFromMnemonic(mnemonic: string): Wallet;
 
   export function getWalletCredentials(
     wallet: Wallet
   ): WalletCredentials;
+
+  export function pkCombine(shards: string[]): Promise<string>;
+
+  export function pkSplit(pk: string): Promise<{ localShard: string; hyplayShard: string; enclaveShard: string }>;
 
   export function toWei(
     etherString: string
