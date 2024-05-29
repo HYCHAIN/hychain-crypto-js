@@ -44,13 +44,13 @@ async function aesDecrypt(
   return new TextDecoder().decode(plaintextBuffer);
 }
 
-async function aesEncryptWalletWithPassword(
+async function aesEncryptWalletWithPasswordOrKeyMaterial(
   wallet, 
-  password, 
+  passwordOrKeyMaterial, 
   salt,
 ) {
   try {
-    const key = await pbkdf2(password, salt);
+    const key = await pbkdf2(passwordOrKeyMaterial, salt);
 
     return await aesEncrypt(JSON.stringify(getWalletCredentials(wallet)), key);
   } catch (error) {
@@ -58,13 +58,13 @@ async function aesEncryptWalletWithPassword(
   }
 }
 
-async function aesDecryptWalletWithPassword(
+async function aesDecryptWalletWithPasswordOrKeyMaterial(
   ciphertext, 
-  password,
+  passwordOrKeyMaterial,
   salt,
 ) {
   try {
-    const key = await pbkdf2(password, salt);
+    const key = await pbkdf2(passwordOrKeyMaterial, salt);
     const walletCredentials = JSON.parse(await aesDecrypt(ciphertext, key));
 
     return getWallet(walletCredentials);
@@ -134,12 +134,12 @@ async function aesDecryptWalletWithBackupQuestionAnswers(
 }
 
 async function pbkdf2(
-  password,
+  passwordOrKeyMaterial,
   salt,
 ) {
   const keyMaterial = await crypto.subtle.importKey(
     'raw',
-    new TextEncoder().encode(password),
+    new TextEncoder().encode(passwordOrKeyMaterial),
     { name: 'PBKDF2' },
     false,
     [ 'deriveBits', 'deriveKey' ],
@@ -412,15 +412,15 @@ async function generateSessionSignature(
   );
 }
 
-async function generateAuthority(password) {
-  if (!password) {
-    throw new Error('password must be provided.');
+async function generateAuthority(passwordOrKeyMaterial) {
+  if (!passwordOrKeyMaterial) {
+    throw new Error('passwordOrKeyMaterial must be provided.');
   }
 
   const wallet = generateRandomWallet();
   const salt = generateRandomSalt();
   const authorityAddress = wallet.address;
-  const authorityCiphertext = await aesEncryptWalletWithPassword(wallet, password, salt);
+  const authorityCiphertext = await aesEncryptWalletWithPasswordOrKeyMaterial(wallet, passwordOrKeyMaterial, salt);
   const authorityProofSignature = await generateScaCreationProofSignature(wallet);
 
   return {
@@ -461,14 +461,14 @@ function generateBackupQuestions() {
 
 async function generateUser(
   username,
-  password,
+  passwordOrKeyMaterial,
   email,
 ) {
-  if (!username && !password) {
-    throw new Error('username and password must be provided.');
+  if (!username && !passwordOrKeyMaterial) {
+    throw new Error('username and passwordOrKeyMaterial must be provided.');
   }
 
-  const authority = await generateAuthority(password);
+  const authority = await generateAuthority(passwordOrKeyMaterial);
 
   return {
     username,
@@ -519,8 +519,8 @@ module.exports = {
   CHAIN_IDS,
   aesEncrypt,
   aesDecrypt,
-  aesEncryptWalletWithPassword,
-  aesDecryptWalletWithPassword,
+  aesEncryptWalletWithPasswordOrKeyMaterial,
+  aesDecryptWalletWithPasswordOrKeyMaterial,
   aesEncryptWalletWithBackupCode,
   aesDecryptWalletWithBackupCode,
   aesEncryptWalletWithBackupQuestionAnswers,

@@ -65,15 +65,15 @@ declare module 'hychain-crypto-js' {
     key: PBKDF2Key
   ): Promise<string>;
 
-  export function aesEncryptWalletWithPassword(
+  export function aesEncryptWalletWithPasswordOrKeyMaterial(
     wallet: Wallet, 
-    password: string, 
+    passwordOrKeyMaterial: string, 
     salt: string
   ): Promise<Ciphertext>;
   
-  export function aesDecryptWalletWithPassword(
+  export function aesDecryptWalletWithPasswordOrKeyMaterial(
     ciphertext: Ciphertext,
-    password: string, 
+    passwordOrKeyMaterial: string, 
     salt: string
   ): Promise<Wallet>;
   
@@ -102,7 +102,7 @@ declare module 'hychain-crypto-js' {
   ): Promise<Wallet>;
 
   export function pbkdf2(
-    password: string, 
+    passwordOrKeyMaterial: string, 
     salt: string
   ): Promise<PBKDF2Key>;
 
@@ -214,7 +214,7 @@ declare module 'hychain-crypto-js' {
   ): Promise<string>;
 
   export function generateAuthority(
-    password: string
+    passwordOrKeyMaterial: string
   ): Promise<{
     salt: string;
     authorityAddress: string;
@@ -228,7 +228,7 @@ declare module 'hychain-crypto-js' {
 
   export function generateUser(
     username: string,
-    password: string,
+    passwordOrKeyMaterial: string,
     email?: string
   ): Promise<{
     username: string;

@@ -6,20 +6,20 @@ chai.should();
 describe('Unit Tests', () => {
   it('aesEncrypt(), aesDecrypt(), pbkdf2()', async () => {
     const plaintext = 'sometext';
-    const password = 'password';
-    const pbkdf2Key = await lib.pbkdf2(password, 'someSalt');
+    const passwordOrKeyMaterial = 'password';
+    const pbkdf2Key = await lib.pbkdf2(passwordOrKeyMaterial, 'someSalt');
     const ciphertext = await lib.aesEncrypt(plaintext, pbkdf2Key);
     const decrypted = await lib.aesDecrypt(ciphertext, pbkdf2Key);
 
     decrypted.should.equal(plaintext);
   });
 
-  it('aesEncryptWalletWithPassword(), aesDecryptWalletWithPassword()', async () => {
+  it('aesEncryptWalletWithPasswordOrKeyMaterial(), aesDecryptWalletWithPasswordOrKeyMaterial()', async () => {
     const wallet = lib.generateRandomWallet();
-    const password = 'somepass';
+    const passwordOrKeyMaterial = 'somepass';
     const salt = lib.generateRandomSalt();
-    const ciphertext = await lib.aesEncryptWalletWithPassword(wallet, password, salt);
-    const decryptedWallet = await lib.aesDecryptWalletWithPassword(ciphertext, password, salt);
+    const ciphertext = await lib.aesEncryptWalletWithPasswordOrKeyMaterial(wallet, passwordOrKeyMaterial, salt);
+    const decryptedWallet = await lib.aesDecryptWalletWithPasswordOrKeyMaterial(ciphertext, passwordOrKeyMaterial, salt);
 
     decryptedWallet.address.should.equal(wallet.address);
     decryptedWallet.mnemonic.phrase.should.equal(wallet.mnemonic.phrase);
@@ -291,8 +291,8 @@ describe('Unit Tests', () => {
   it('generateUser()', async () => {
     const username = 'iamarkdev';
     const email = 'ark@hychain.com';
-    const password = 'testing';
-    const user = await lib.generateUser(username, password, email);
+    const passwordOrKeyMaterial = 'testing';
+    const user = await lib.generateUser(username, passwordOrKeyMaterial, email);
 
     user.should.have.property('username');
     user.should.have.property('email');
@@ -303,21 +303,21 @@ describe('Unit Tests', () => {
     user.username.should.equal(username);
     user.email.should.equal(email);
 
-    const decryptedWallet = await lib.aesDecryptWalletWithPassword(user.authorityCiphertext, password, user.salt);
+    const decryptedWallet = await lib.aesDecryptWalletWithPasswordOrKeyMaterial(user.authorityCiphertext, passwordOrKeyMaterial, user.salt);
 
     decryptedWallet.should.be.an('object');
   });
 
   it('generateAuthority()', async () => {
-    const password = 'testing';
-    const authority = await lib.generateAuthority(password);
+    const passwordOrKeyMaterial = 'testing';
+    const authority = await lib.generateAuthority(passwordOrKeyMaterial);
 
     authority.should.have.property('salt');
     authority.should.have.property('authorityAddress');
     authority.should.have.property('authorityCiphertext');
     authority.should.have.property('authorityProofSignature');
 
-    const decryptedWallet = await lib.aesDecryptWalletWithPassword(authority.authorityCiphertext, password, authority.salt);
+    const decryptedWallet = await lib.aesDecryptWalletWithPasswordOrKeyMaterial(authority.authorityCiphertext, passwordOrKeyMaterial, authority.salt);
 
     decryptedWallet.should.be.an('object');
   });
