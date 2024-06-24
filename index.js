@@ -244,7 +244,7 @@ function generateCallRequest(
 }
 
 function generateCreateRequest(
-  salt,
+  salt = generateRandomSalt(),
   nonce = generateRandomNonce(),
   bytecode = '0x',
   initCode = '0x',

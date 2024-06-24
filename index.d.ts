@@ -135,7 +135,7 @@ declare module 'hychain-crypto-js' {
   ): CallRequest;
 
   export function generateCreateRequest(
-    salt: string,
+    salt?: string,
     nonce?: string,
     bytecode?: string,
     initCode?: string,
