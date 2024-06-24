@@ -134,6 +134,20 @@ declare module 'hychain-crypto-js' {
     data?: CallRequestData
   ): CallRequest;
 
+  export function generateCreateRequest(
+    salt: string,
+    nonce?: string,
+    bytecode?: string,
+    initCode?: string,
+  ): CreateRequest;
+
+  export function generateCreateRequestSignature(
+    wallet: Wallet,
+    createRequest: CreateRequest,
+    deadline: number,
+    chainId: number
+  ): Promise<string>;
+
   export function generateCalldataEncoding(
     abi: InterfaceAbi,
     values: any[]

@@ -243,6 +243,39 @@ function generateCallRequest(
   return [ target, value, nonce, data ];
 }
 
+function generateCreateRequest(
+  salt,
+  nonce = generateRandomNonce(),
+  bytecode = '0x',
+  initCode = '0x',
+) {
+  return [ salt, nonce, bytecode, initCode ];
+}
+
+async function generateCreateRequestSignature(
+  wallet,
+  createRequest,
+  deadline,
+  chainId,
+) {
+  const encodedCreateRequest = generateCalldataEncoding(
+    [
+      'tuple(bytes32, uint256, bytes, bytes)',
+      'uint256',
+      'uint256',
+    ],
+    [
+      createRequest,
+      deadline,
+      chainId,
+    ],
+  );
+
+  return await wallet.signMessage(
+    ethers.getBytes(ethers.keccak256(encodedCreateRequest)),
+  );
+}
+
 function generateCalldataEncoding(
   types,
   values,
@@ -533,6 +566,8 @@ module.exports = {
   generateCallRequestDataFromAbi,
   generateCallRequestDataFromFunctionSignature,
   generateCallRequest,
+  generateCreateRequest,
+  generateCreateRequestSignature,
   generateCalldataEncoding,
   generateCallRequestSignature,
   generateCallRequirements,

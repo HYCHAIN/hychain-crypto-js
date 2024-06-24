@@ -129,6 +129,28 @@ describe('Unit Tests', () => {
     callRequest[2].should.be.a('string'); // nonce
   });
 
+  it('generateCreateRequest()', () => {
+    const createRequest = lib.generateCreateRequest(
+      '0x5fb2054478353fd8d514056d1745b3a9eef066deadda4b90967af7ca65ce6505',
+      '0x0',
+    );
+
+    createRequest.should.be.an('array');
+  });
+
+  it('generateCreateRequestSignature()', async () => {
+    const wallet = lib.generateRandomWallet();
+    const createRequest = lib.generateCreateRequest(
+      '0x5fb2054478353fd8d514056d1745b3a9eef066deadda4b90967af7ca65ce6505',
+      '0x0',
+    );
+    const deadline = Math.floor(Date.now()/ 1000);
+    const chainId = lib.CHAIN_IDS['HYCHAIN'];
+    const createRequestSignature = await lib.generateCreateRequestSignature(wallet, createRequest, deadline, chainId);
+
+    createRequestSignature.length.should.equal(132);
+  });
+
   it('generateCalldataEncoding()', () => {
     const calldataEncoding = lib.generateCalldataEncoding(
       [ 'address', 'uint256'  ],
