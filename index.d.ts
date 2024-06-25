@@ -14,6 +14,12 @@ declare module 'hychain-crypto-js' {
     string, // nonce
     string, // data
   ];
+  export type CreateRequest = [
+    string, // salt
+    string, // nonce
+    string, // bytecode
+    string, // initCode
+  ];
   export type SessionRequest = {
     nativeAllowance?: string;
     contractFunctionSelectors?: {
