@@ -236,7 +236,7 @@ function generateCallRequestDataFromFunctionSignature(
 
 function generateCallRequest(
   target,
-  value,
+  value = '0',
   nonce = generateRandomNonce(),
   data = '0x',
 ) {
