@@ -244,7 +244,7 @@ function generateCallRequest(
 }
 
 function generateCreateRequest(
-  salt = generateRandomSalt(),
+  salt = generateRandomNonce(), // nonce returns 0x bytes, salt returns arbitrary string, use random nonce type here for evm compatibility.
   nonce = generateRandomNonce(),
   bytecode = '0x',
   initCode = '0x',
