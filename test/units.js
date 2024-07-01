@@ -256,6 +256,19 @@ describe('Unit Tests', () => {
     nonceSignature.signature.length.should.equal(132);
   });
 
+  it('generateUpgradeSignature()', async () => {
+    const wallet = lib.generateRandomWallet();
+    const upgradeSignature = await lib.generateUpgradeSignature(
+      wallet,
+      '0xccccb68e1a848cbdb5b60a974e07aae143ed40c3', // random addr for testing
+      '0x',
+      Math.floor(Date.now() / 1000),
+      lib.CHAIN_IDS['HYCHAIN'],
+    );
+
+    upgradeSignature.length.should.equal(132);
+  });
+
   it('generateSessionRequestTuple()', async () => {
     const sessionRequest = {
       nativeAllowance: '100',

@@ -394,6 +394,33 @@ async function generateNonceSignature(wallet, nonceBytes = 32) {
   return { nonce, signature };
 }
 
+async function generateUpgradeSignature(
+  wallet,
+  newImplementation,
+  data,
+  deadline,
+  chainId,
+) {
+  const encodedUpgrade = generateCalldataEncoding(
+    [
+      'address',
+      'bytes',
+      'uint256',
+      'uint256',
+    ],
+    [
+      newImplementation,
+      data,
+      deadline,
+      chainId,
+    ],
+  );
+
+  return await wallet.signMessage(
+    ethers.getBytes(ethers.keccak256(encodedUpgrade)),
+  );
+}
+
 function generateSessionRequestTuple(sessionRequest = {}) {
   const transformSelectors = s => !s.startsWith('0x') ? generateFunctionSelectorAndTypesFromFunctionSignature(s).selector : s;
 
@@ -575,6 +602,7 @@ module.exports = {
   generateMulticallRequirements,
   generateScaCreationProofSignature,
   generateNonceSignature,
+  generateUpgradeSignature,
   generateSessionRequestTuple,
   generateSessionSignature,
   generateAuthority,

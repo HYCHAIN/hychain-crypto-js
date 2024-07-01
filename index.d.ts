@@ -219,6 +219,14 @@ declare module 'hychain-crypto-js' {
       signature: string;
   }>;
 
+  export function generateUpgradeSignature(
+    wallet: Wallet,
+    newImplementation: string,
+    data: string,
+    deadline: number,
+    chainId: number
+  ): Promise<string>;    
+
   export function generateSessionRequestTuple(
     sessionRequest: SessionRequest
   ): SessionRequestTuple;
